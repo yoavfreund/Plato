@@ -1,0 +1,65 @@
+\reminder{REMINDERS ON POINTS FOR INTRODUCTION}
+
+\paragraph{Problems of current approaches to combining databases with statistical signal processing}
+\begin{itemize}
+\item Statistics and predictive analytics involve a tedious process where data are moved out of databases into statistical processing software (eg R) and then stored back.
+%
+\item None of the cornerstones of the success of SQL systems is available: No logical/physical separation, no declarative queries and no automatic optimization of storage and query processing.
+%
+\item Spatiotemporal sensor data are qualitatively different in a way that prevents the direct use of SQL, which has been tuned for discrete precise data: Unlike ERP and CRM business use cases, where the database data constitute the world, sensor data are mere measurements of the real world - potentially imprecise. Models (continuous functions over space and time) are the actual representation of the world and predict values at any coordinate. Query languages and database modeling has to facilitate the use of predicted values.
+%
+\item Sensor data are unnecessarilly big in their raw form. Yet signal processing research has known for long that data can be split into signal and the often unimportant noise, leading to high effective lossless compression. 
+%
+\end{itemize}
+
+\paragraph{The benefits of a model-aware database}
+
+\begin{itemize}
+%
+\item Plato brings models in the database. Models are continous functions that predict the quantity of interest at any coordinate. A model introduces knowledge of the external physical reality.
+%
+\item Well-developed theory and set of models and model generators that effectively capture many real world cases.
+%
+\item Holds promise to solve the problems above. Plato enables declarative queries and automatic optimization of storage and query processing.
+%
+\end{itemize}
+
+\paragraph{Research Challenges}
+\begin{itemize}
+%
+\item Specify declarative query languages that process models.
+%
+\item The database algorithms can work efficiently directly on the models. Specify a logically/physically-separated architecture where an optimizer is aware of the specifics of the model representation and chooses query processing algorithms accordingly.  For example, consider two models represented by their Fourier transform and a query that asks for their correlation. It is most efficient to compute directly on the frequency domain rather than bringing back to time domain.
+%
+\item Signal processing community provides a wide variety of model generators, with various guarantees on the loss information. Plato must semiautomate the choice of the appropriate model generator. This requires a classification of model generators with respect to their loss of information properties. More importantly, different queries may pose different needs of accuracy and of what constitues information loss. The semiautomation must take into account query workload. The query answering must utilize the best model for the problem. Granularity of queries can also play a role: Can you avoid computing the entire model and instead compute on the fly only the parts of the model that are of interest to the query? Which models are best fo such?
+%
+\item How do you incrementally maintain the model as the data change? Tradeoff between speed of convergence and computational resources used. Again, query workload must specify.
+\end{itemize}
+
+\paragraph{Use cases}
+
+\subsection{Prior work on model-aware databases}
+\reminder{to Yannis K: Please check and add to the representations I make about the prior work.}
+
+\paragraph{Works from ML and statistical signal processing communities} \reminder{for Yoav}
+
+\paragraph{MauveDB} Argued for the value of direct SQL processing. MauveDB uses models to predict values on a developer-specified grid. 
+
+\begin{itemize}
+\item Plato argues that models need no be discretized in the coordinates' grid. A fully virtual approach, where the model is perceived as a continous function, is easier for the developer and more opportune for the optimizer. For example, consider two models represented by their Fourier transform and a query that asks for their correlation. It is most efficient to compute directly on the frequency domain rather than bringing back to time domain.
+%
+\item Did not investigate the connections between (a) choosing models and query workload and (b) query guarantees given chosen models.
+\end{itemize}
+
+
+\paragraph{Function Db (MIT)} 
+\begin{itemize}
+\item Showed that in the case of models captured by polynomials better compression and faster processing is achieved by working directly on polynomials.
+\end{itemize}
+
+
+\paragraph{Aberer}
+\reminder{for Yannis K: It seems he promised a lot and did a little. What do we write about this?}
+
+
+\paragraph{Approximate query processing}

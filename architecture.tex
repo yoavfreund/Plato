@@ -1,0 +1,66 @@
+% model class
+% light integration of models with relational data Vs deep integration
+% UDFs: is it like a UDF or is it a UDF? Are tables with UDFs allowed to have code + data.
+
+\section{Plato: An extensible model-aware database}
+\label{sec:architecture}
+The proposed Plato database aims to solve the discussed problems by introducing models as first class citizens. This section provides the basic definitions, architecture (Figure~\ref{fig:basic-architecture}) and examples.
+
+Sensor data measurements lead into conventional SQL tables, which we will refer to as {\em measurements tables}.  We will regularly name space and time attributes as $X$, $Y$, $Z$ and $T$. Their values will be denoted by $x, y, z, t$. We will denote the respective types by caligraphic letters $\mathcal{X}$, $\mathcal{Y}$, $\mathcal{Z}$ and $\mathcal{T}$.
+%As is the case in many business intelligence systems, the attributes of a measurements table will typically be divided into {\em dimensions} and {\em measures}. 
+\begin{example}
+In our running example, a tuple $(s, t, q)$ of a measurements table with schema \texttt{temp\_meas(Sensor, T, Temp)} (i.e., a table with attributes \texttt{Sensor}, \texttt{T} and \texttt{Temp}) means that the temperature sensor $s$ provided at time $t$ the temperature measurement $m$. The \texttt{Sensor} attribute is a foreign key to a table \texttt{temp\_sensor(ID, X, Y, Installed\_on, $\ldots$)} that provides the latitude, longitude and other data about each sensor.% 
+\footnote{The data administrator can decide what is the best schema for the measurements data. For example, instead of a single table carrying all the temperature sensor measurements, the administrator may choose one table for each sensor.
+}
+\end{example}
+
+Plato's models are inferred from the measurements and external knowledge of the domain. They are mathematical representations of the world, which predict a quantity of interest (e.g., temperature).
+In the basic case, a {\em model} is a continuous function $f:\mathcal{\bar{D}}\mapsto \mathcal{Q}$. For each vector $\bar{d}$ in the (generally multidimensional) spatiotemporal domain $\mathcal{\bar{D}}$ the function $f$ returns a quantity $q \in \mathcal{Q}$. The domain $\mathcal{\bar{D}}$ could be a sphere of $(x, y, t)$ points around a center $(x_0, y_0, t_0)$, a square of $(x, y)$ points, etc.
+
+Plato treats the function signature $\mathcal{\bar{D}}\mapsto \mathcal{Q}$ as a database type. 
+Any table may have an attribute (or more attributes) whose values are models conforming to a particular type, i.e., particular function signature. In that sense, a model operates as a database User Defined Function (UDF).
+We will refer to a table that has model attributes as a {\em model table}. 
+%Model tables are defined by SQL view definitions that involve {\em model generator} functions. 
+
+Technically, a model is the output of a {\em model generator} function and, respectively, a model table is the output of a view definition that involves model generators. A model (or a model table for that matter) may be virtual in the sense that SQL view definitions are virtual, i.e., no actual computation is performed until a query uses them. However, in practice, the administrator is motivated to materialize models (and the  respective model tables) in order to benefit from the data compression that models enable. Indeed, the administrator has to choose between multiple model generators, which come with different compression levels and corresponding guarantees regarding information preservation. Indeed, a major research issue, discussed in Section~\ref{sec:model-generators}, is the semiautomation of the choice of model generators, which should take into consideration the query/analytics workload.
+
+\begin{example}
+\label{xmpl:models-and-definitions}
+A tuple $(s, f)$ of the table \texttt{temp\_models(Sensor, F:t->temp)} means that the function $f$ describes the real world temperatures, which sensor $s$ was observing. The signature \texttt{t -> float} indicates that the functions/values of \texttt{F} input time and output floating points. The table \texttt{temp\_models} is defined by the view definition:
+\begin{verbatim}
+DEFINE MATERIZALIED VIEW sensor_models AS 
+SELECT sensor, arma_t_nr(G)
+FROM temp_meas GROUP BY sensor AS G(T, Temp)
+\end{verbatim}
+\noindent The view definition groups the temperature measurements sensor, and then the measurements \texttt{G} of each sensor are provided to the model generator function \texttt{arma\_t\_nr}, whose single argument must be a table of time-float tuples. The generator infers an ARMA model that captures the underlying temperature signal. The \texttt{nr} is a characterization, applicable to multiple generators, on how to separate signal from noise. Note that the temporal ARMA and \texttt{nr} choices are just one among the many model generator options.
+
+In a modification of the running example, the administrator chooses to capture temperature in a single model \texttt{full\_model} that predicts the temperature based on \texttt{x}, \texttt{y} and \texttt{t} and is defined as follows:
+\begin{verbatim}
+DEFINE MATERIALIZED VIEW full_model AS 
+arma_xyt_nr(SELECT X, Y, T, Temp
+FROM temp_meas, tempsensor WHERE Sensor = ID)
+\end{verbatim}
+\noindent The reasons for doing so could be: (a) The individual sensor models may be heavily correlated based on the \texttt{X} and \texttt{Y} sensor coordinates. In such case, a single model can have a much more compact representation than the collection of individual sensor models.
+(b) The analytics may need temperature predictions for specific locations, which do not coincide with any individual sensor.
+\end{example}
+
+\paragraph{Vector quantities} In the general case, a model's quantity is a vector (rather than a scalar) from the domain $\mathcal{\bar{Q}}$.
+
+\paragraph{Probabilistic model tables} In the general case a model returns probability distributions of the quantities, rather than absolute values. Therefore a model is a function $f:\mathcal{\bar{D}}\mapsto \mathcal{H_{\bar{Q}}}$, where $\mathcal{H_{\bar{Q}}}$ is the space of probability distributions over the quantity domain $\mathcal{\bar{Q}}$. The probability distributions capture the certainty of the predicted values.  For example, the model of Example~\ref{xmpl:models-and-definitions} can easily benefit from returning probability distributions of the predicted temperatures. A key use case is that the probability distributions indicate how certain one is about the confidence intervals of the predicted quantities.
+
+\paragraph{Viewing models as infinitely-sized tables} Notice that a model $f:\mathcal{\bar{D}}\mapsto \mathcal{H_{\bar{Q}}}$ can be also perceived as a table $R_f(\bar{D}, \bar{Q}, H)$, where the table has an infinite number of tuples, the coordinates $\bar{D}$ form a key and the attribute $H$ provides the value of the probability distribution at the specific coordinates.
+Correspondingly, the models that are the values of a table's attribute can be perceived as infinite size nested tables.%
+\footnote{Extending SQL to nested tables has been a well-studied topic in the database management field and recently it is featured in multiple ``Big Data" databases that feature semistructured models. 
+}
+
+\subsection{Queries and Optimized Query Evaluation}
+\label{sec:queries}
+A key success factor of database systems has been the declarative SQL query language where the user/developer expresses the desired result of his analysis without having to specify the algorithm that computes this result and without having to refer to the data structures where the data are stored. The database discovers the optimal plan to compute the result, making best use of the available data structures. 
+
+In the spirit of declarative programming, Plato offers two categories of SQL extensions that enable model-related computations, while Plato utilizes model-specific rewritings to optimize the computation. 
+
+Unlike conventional query optimization, where the rewritings produce equivalent expressions, opportune rewritings in model-based databases are not guaranteed to produce queries with identical results. Rather, in many importnt cases the results are guaranteed to be equivalent under common assumptions of statistical signal processing. In other cases, they are guaranteed to be equivalent within certain error bounds. Plato queries allow the user to specify the requested guarantee by providing appropriate parameters.
+
+The first category utilizes various functions that input models and output statistic measures or models. The second category allows variables that range over the infinitely-many coordinate points. 
+
+
