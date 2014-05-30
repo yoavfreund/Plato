@@ -47,6 +47,14 @@ For each model class, Plato will internally have a corresponding implementation 
 
 \reminder{to Yoav (Priority 1): What do we do if we want to correlate two models that are based on different representations? Eg, consider that $x$ is stored in a frequency representation and $y$ is stored in an ARMA. What is the fastest algorithm for computing the correlation of $x$ and $y$? There should be correlation algorithms that are better than decompressing $x$ and $y$ in the time domain. Are there such algorithms? If no, we should add in proposal. If yes, is it known how many options are available and what is the best option? If no, we should add in the proposal.
 }
+{\bf Yoav:} I believe you correlate {\em signals}, not models. You can
+check whether two models are {\em consistent} with each other, or you
+can compute the {\em likelihood} that a model assigns to an observed
+signal.
+
+As for correlating signals, your example is correct. I don't know of
+methods for efficiently computing the correlation between two signals 
+that are represented in a way other than the FFT.
 
 \subsection{Any-time query processing}
 \label{sec:anytime}
@@ -58,6 +66,10 @@ Generally, a model representation can be stored in sequences of data where prefi
 
 \reminder{Question to Yoav (Priority 1): For the typical model classes (ARMA, Fourier, SVD etc) is there a single and obvious ordering (eg, amplitude in Fourier) that accomodates all typical statistical functions? Or we need to state a problem: Discover the appropriate orders for various functions. 
 }
+{\bf Yoav:} I am not sure what you mean by ``ordering'' either in
+general or in the context of the Fourier transform. Do you mean
+something like the ordering of eigen-vectors in SVD by decreasing eigen-values?
+
 
 \subsection{Rewriting}
 \reminder{to all: See first reminder of this section. We can probably capture it as a rewriting case, where the way that the query runs is not by trying all pairs.
