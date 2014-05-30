@@ -1,0 +1,21 @@
+\section{Motivation}
+
+The analysis of sensor data has traditionally been the domain of
+signal processing, image processing, audio processing and the
+like. However, these experts are challanged when data is
+collected from large ad-hoc sensor networks. In such a situation it is
+nor enough to replicate the single sensor solution for each
+sensor. Instead, an integrated system that provides real-time signal
+processing, data flow management and data integration is needed. This
+need naturally leads us to database systems.
+
+However, existing database systems are not a good solution, for
+several reasons.
+\begin{itemize}
+\item Database systems use schemas which provide a high-level
+  representation of the structure of the data. We call this type of
+  organization explicit or extrinsic. The extrinsic structure of the
+  data collected in a sensor is very simple - it is a collection of
+  sample sequences which can sometime be represented as a single table
+  with measurements as the columns and sample times as the rows.
+\end{itemize}

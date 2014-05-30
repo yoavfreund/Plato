@@ -3,4 +3,31 @@
 
 \section{Opportunities in Data Compression}
 \label{sec:compression}
-As is well known from signal processing, relatively few model classes, such as ARMA models, Fourier and wavelet-based models and Singular Value Decomposition (SVD) based models capture very well various scenarios. The key function of the raw data administrator is to choose the appropriate {\em model generator} and feed it with the appropriate parameters that will dictate compression, accuracy. The important lesson from signal processing, which we will discuss in Section~\ref{sec:compression}, is that high compression can be achieved with minimal or even no loss of accuracy.
+As is well known from signal processing, relatively few model classes, such as ARMA models, Fourier and wavelet-based models and Singular Value Decomposition (SVD) based models capture very well various scenarios. The key function of the raw data administrator is to choose the appropriate {\em model generator} and feed it with the appropriate parameters that will dictate compression, accuracy. The important lesson from signal processing is that high compression can be achieved with minimal or even no loss of accuracy.
+
+% Similarity to answering queries using views.
+
+\subsection{Choosing model alternatives}
+\label{sec:choosing-model-alternatives}
+\reminder{skip this subsection. may become irrelevant due to the increasing depth representation discussed in the query processing}
+The model administrator can choose more or less compressed model alternatives. The choice presents a speed-accuracy trade-off: Noise-reducted model alternatives will enable precise query answers but at the cost of speed, since their representations will be relatively large. In contrast, 
+lossy model alternatives will lead to very fast queries but at the cost of query answer accuracy. Plato will provide a {\em model administrator assistant} module that semiautomates the process of choosing the appropriate model representation by solving the following problems.
+
+% query answering using a model alternative
+% what is the accuracy damage
+
+\paragraph{Choosing a model alternative given a query}
+In the simplest setting, the assistant is given
+\begin{enumerate} 
+%
+\item data measurements.
+%
+\item a model generator that can produce a noise-reducted model $f_{nr}$ of the measurements
+%
+\item a lossy model generator and candidate loss parameters. For example, the assistant may given the \texttt{fourier\_rms} model generator with candidate RMS error (loss parameter) 0.01, 0.02, 0.03, ..., 0.20. In principle, each setting $e_i$ of the loss parameter leads to another model $f_i$. Furthermore, the representation size of $f_i$ is larger than the representation size of $f_{i+1}$ and all of them are smaller than $f_{nr}$. Let us call 
+%
+\item a single query $Q$ that uses a model $f$ and a specification of the desired accuracy of the result.
+%
+\end{enumerate}
+
+\subsection{Adjusting to filtering needs}

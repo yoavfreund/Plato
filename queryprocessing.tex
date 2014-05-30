@@ -1,0 +1,64 @@
+\section{Query Processing}
+\label{sec:query-processing}
+
+\begin{example}
+\label{xmpl:correlation}
+The following query discovers the pairs of highly correlated temperature sensors and will be the running example of this section.
+\begin{tabbing}
+\scriptsize
+\texttt{SELECT sm1.sensor, sm2.sensor}\\
+\texttt{FROM sensor\_models sm1, sensor\_models sm2}\\
+\texttt{WHERE corelation(sm1.model, sm2.model) > 0.9}
+\end{tabbing}
+
+\reminder{to Yoav (Priority 2): An obvious and inefficient way to find the required pairs is to try all pairs. However, there is a better way, based on the transitivity of correlation. Eg, if corelation(x,y) is very close to 1 and corelation(y,z) is very close to 1 it should be that correlation(x,z) is somewhat close to 1. Let's discuss it because there may be good space for rewriting optimizations, i.e., showing how an optimizer can capture such patterns and execute in more efficient plans.
+}
+\end{example}
+
+\paragraph{Processing queries by materializing model values on a grid}
+MauveDB suggested that the analyst specifies a spatiotemporal grid and each model participating in a query returns the quantities at the grid's points. Consequently, the statistical functions of the query can be computed in a straightforward way. 
+
+\begin{example}
+The following Plato query utilizes MauveDB's technique. It dictates a grid-based execution of the query of Example~\ref{xmpl:correlation}.
+\begin{tabbing}
+\texttt{SELECT sm1.sensor, sm2.sensor}\\
+\texttt{FROM sensor\_models sm1, sensor\_models sm2}\\
+\texttt{LET grid\_start = min\_coord(sm1.model, sm2.model)}\\
+\texttt{LET grid\_end = max\_coord(sm1.model, sm2.model)}\\
+\texttt{WHERE corelation(}\=\texttt{grid(sm1.model, grid\_start, grid\_end, 60)}\\ \>\texttt{grid(sm2.model, grid\_start, grid\_end, 60)) > 0.9}
+\end{tabbing}
+\noindent The function $\texttt{grid}(f, l, u, s)$ creates a discrete model $f_d$ that is defined only on the grid defined by the start $l$, the end $u$ and the step $s$.  For every point $t_i = l + is, t_i \leq u$ it is $f_d(t_i) = f(t_i)$.
+\end{example}
+
+While the grid materialization provides a baseline solution, it has two shortcomings. First, the analyst must guess an appropriate grid granularity. A too fine grid will produce accurate results but it will also lead to unnecessarily large discrete models and slow query processing. On the other extreme, a too coarse grid will produce inaccurate results. A better approach is to allow Plato to automatically devise the appropriate grid granularity, based on smoothness of the involved functions.
+\reminder{to Yoav and Yannis K (Priority 2): Is selection of the appropriate grid granularity a solved problem in signal processing? It sounds very close to the sampling problem: How many samples are enough?
+}
+
+Still, even with automatic inference of the appropriate grid, the grid-based query processing misses the large opportunity discussed next.
+
+%\reminder{Matt, let's back this up with numbers from the energy.}
+
+\paragraph{Processing queries directly on model representations}
+%\label{sec:qp-direct-on-models}
+Statistical functions can be performed directly on the model representations, therefore reaping the benefits of the compression. In the running Example~\ref{xmpl:correlation}, the correlation function query of  can be executed faster directly on the frequency representation.%
+\reminder{to Yannis P: Complete formula that computes correlation from frequencies.}
+
+For each model class, Plato will internally have a corresponding implementation of each statistical function. Consequently, query processing will be automatically using the appropriate implementation (e.g., correlation on the frequency domain). The grid technique will be the last resort, in the case where Plato does not have an implementation that works directly on the compressed model representations.
+
+\reminder{to Yoav (Priority 1): What do we do if we want to correlate two models that are based on different representations? Eg, consider that $x$ is stored in a frequency representation and $y$ is stored in an ARMA. What is the fastest algorithm for computing the correlation of $x$ and $y$? There should be correlation algorithms that are better than decompressing $x$ and $y$ in the time domain. Are there such algorithms? If no, we should add in proposal. If yes, is it known how many options are available and what is the best option? If no, we should add in the proposal.
+}
+
+\subsection{Any-time query processing}
+\label{sec:anytime}
+The analyst may elect to materialize a model representation in a way that facilitates any-time query processing and the quick evaluation of conditions. For example, consider a frequency-based representation. It can internally be represented by a sequence of frequency-amplitude pairs, sorted by the amplitude of each frequency. Consequently, given the query of Example~\ref{xmpl:correlation}, the frequency-based correlation algorithm may need only the first high amplitude frequencies in order to show that the correlation is above 0.9. 
+
+Generally, a model representation can be stored in sequences of data where prefixes of increasing size correspond to models of increasing accuracy. Plato will allow any-time queries that utilize the above representation property to compute results in increasing accuracy.
+
+\reminder{to Yannis P: spell out syntax of anytime queries. Look if BlinkDb has the concept also. }
+
+\reminder{Question to Yoav (Priority 1): For the typical model classes (ARMA, Fourier, SVD etc) is there a single and obvious ordering (eg, amplitude in Fourier) that accomodates all typical statistical functions? Or we need to state a problem: Discover the appropriate orders for various functions. 
+}
+
+\subsection{Rewriting}
+\reminder{to all: See first reminder of this section. We can probably capture it as a rewriting case, where the way that the query runs is not by trying all pairs.
+}
