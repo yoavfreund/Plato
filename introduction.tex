@@ -17,7 +17,25 @@ data-bases.
 
 \paragraph{The healthy aspects of SQL databases in analytics}
 %SQL systems have been a success in BI, OLAP...
-Since the 80s SQL database systems gradually became the cornerstone of the vast majority of Business Intelligence (BI) and On Line Analytical Processing (OLAP) applications. Their success is primarily attributed to {\em declarative querying (via SQL)}, {\em automatic query optimization} and the {\em physical-logical independence}. In a typical database-driven application architecture (see Figure~\ref{fig:db-driven-arch}), the business intelligence application issues an SQL query over tables. The tables are {\em logical} in the sense that they are just mathematical relations, while the underlying storage, clustering and indexing details constitute a {\em physical} layer, whose knowledge is not needed for writing queries. The queries are declarative in the sense that they only describe the desired result without describing the algorithm that computes the result. A query optimizer automatically decides which is the best plan for executing the query, taking into consideration the physical organization of the storage. A database administrator may alter the data structures and indices from time to time in order boost the performance of the observed workload. However, logical/physical separation says that such data representation, fine-tuning changes at the ``physical" level do not require rewriting of the logical layer. Rather, the query processing speed will automatically benefit.
+Since the 80s SQL database systems gradually became the cornerstone of
+the vast majority of Business Intelligence (BI) and On Line Analytical
+Processing (OLAP) applications. 
+Their success is primarily attributed to {\em declarative querying
+(via SQL)}, {\em automatic query optimization} and the {\em
+physical-logical independence}. In a typical database-driven
+application architecture (see Figure~\ref{fig:db-driven-arch}), the
+business intelligence application issues an SQL query over tables. The
+tables are {\em logical} in the sense that they are just mathematical
+relations, while the underlying storage, clustering and indexing
+details constitute a {\em physical} layer, whose knowledge is not
+needed for writing queries. The queries are declarative in the sense
+that they only describe the desired result without describing the
+algorithm that computes the result. A query optimizer automatically
+decides which is the best plan for executing the query, taking into
+consideration the physical organization of the storage. A database
+administrator may alter the data structures and indices from time to
+time in order boost the performance of the observed workload. However,
+logical/physical separation dictates that fine-tuning changes at the ``physical" level do not require rewriting of the logical layer. Rather, the query processing speed will automatically benefit.
 
 % parallel
 
@@ -29,13 +47,26 @@ Further levels of abstraction are achieved with {\em views}, which are tables th
 
 \paragraph{The failures of SQL databases in spatiotemporal sensor data analytics}
 %SQL systems fail in sensor data analytics
-SQL systems fail in the space of predictive analytics involving sensors that generate measurements in the space and time dimensions.%
+SQL systems fail in the space of predictive analytics involving
+sensors that generate measurements in continuous space and time
+%
 \footnote{Indeed, one may argue that some of the discussed failures and respective remedies proposed by Plato, also apply to predictive analytics of non-sensor, non-spatiotemporal data. Nevertheless, the focus of this project is exclusively on spatiotemporal sensor data.
-}
+} 
+\yoav{In this context it is important to distinguish between the 
+{\em real world model} and the {\em sensor model}. The real world
+model is a set of functions which map a {\em continuous coordinate
+system} (such as time and space) to quantities such as temperature or
+air quality. The sensor model defines the location of the sensors in
+the real world model, the times in which they sample, and the value
+sequences collected from the sensors.
+The tension comes from the fact that the only source of data: the
+measurements, are noisy and discrete in time and space, while the real
+world model is defined for all coordinate values.}
+
 Next, we argue that at the core of the failures of SQL databases is the fact that they lack a critical abstraction, which is the {\em Real World Model}.%
 \footnote{The real world model is frequently called the ``physical model" as it corresponds to the physics of the real world. This proposal uses the term ``real world model" (instead of the term ``physical model") to avoid the confusion caused by the two different meanings of the word ``physical" in the sensors' signal processing and the database community.
 }
-Then we argue next that this omission leads to multiple failures: Tedious programming and system integration, lack of abstractions, which requires developers/analysts to jungle the high level, where they think of statistics, such as the correlation of two signals, with the low level programming where they deal with the specifics of the model. The second failure is that often the massive amounts of measurements are used directly in the statistics, leading to a performance waste.
+Then we argue next that this omission leads to multiple failures: Tedious programming and system integration, lack of abstractions, which requires developers/analysts to jungle the high level, where they think of statistics, such as the correlation of two sequences, with the low level programming where they deal with the specifics of the model. The second failure is that often the massive amounts of measurements are used directly in the statistics, leading to a performance waste.
 
 In general, the data contained in an SQL database have a one-to-one mapping to the captured real world objects and events. For example, a database may represent persons, which have an address, a name and a telephone number. Each represented person is supposed to be a corresponding unique entity in the world. Vice versa, as far as the database and the applications running on it are concerned, the represented entities, attributes and relationships constitute the entire real world of interest. On the other hand, the sensor data are mere samples (measurements) of the reality. The full reality of interest to the applications is captured by models that predict the quantity of interest at each point in a range of time and possibly also in an area of space. In practice, the gap between the measurements and the real world models is best crossed by learning algorithms that discover the parameters of the real world model. 
 

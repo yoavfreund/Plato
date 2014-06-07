@@ -12,6 +12,74 @@ As is well known from signal processing, relatively few model classes, such as A
 
 \reminder{To Yoav: Please add discussion on the following: (a) Lossless: Does not achieve significant compression, (b) Noise-reducted lossy, (c) Additive hierarchy of (b)}
 
+\yoav{
+From a mathematical point of view, there is a close connection between
+fitting a probabilistic model to data and compressing the data. A both
+are central to the workings of Plato, we briefly describe them here.
+
+\subsubsection{Lossless compression}
+A lossless compression method is one which can reconstruct the
+original measurements without error. A lossless compression method
+corresponds to an assumption about the statistical model over the data
+and. The compression ratio is a function of the divergence (the
+Kullback-Leibler-divergence) between the assumed distribution and the true
+distribution. Thus the compression ratio is a measure of the
+randomness in the sensor data. Unfortunately, lossless compression
+methods usually achieve a compression ratio of around 2-4. Which
+corresponds to the fact that they accurately capture both the true
+state of the world (the signal) and the many random influences on the
+measurements (the noise). Lossless compression cannot distinguish
+between the two.
+
+\newcommand{\hx}{\hat{x}}
+\subsubsection{Lossy compression}
+In order to reach higher compression ratios than lossless
+compression. It is common to use {\em Lossy compression}~\cite{CompressionBook}. In this
+case, instead of requiring perfect reconstruction of the original
+measurements, we allow a quantifyable amount of {\em distortion} in
+the reconstruction. Suppose $\langle x_1,\ldots,x_t \rangle$ is the original
+sequence and the reconstructed sequence is $\langle \hx_1,\ldots,\hx_t
+\rangle$.
+By far, the most common measure of distortion is the {\em root-mean-square}
+or RMS:
+\[
+\mbox{RMS}\left(  \langle x_1,\ldots,x_t \rangle, \hx_1,\ldots,\hx_t \right)
+\doteq \sqrt{\frac{\sum_{i=1}^t (x_i =\hx_i)^2}{t}}
+\]
+If the errors are usually small and only rarly very large,
+the RMS is misleadingly large. A better error measure in such
+situations is the fraction of times the error is larger
+than some threshold:
+\[
+\mbox{err}_{\epsilon}\left(  \langle x_1,\ldots,x_t \rangle,
+\hx_1,\ldots,\hx_t \right)
+\doteq \frac{\sum_{i=1}^t \mathbf{1}\left(|x_i-\hx_i|>\epsilon \right)}{t}
+\]
+Lossy compression methods such as {\tt jpeg2000} for images and {\tt
+  mp3} for audio can achieve compression ratios of 100 and more
+with no perceptible degredation in quality.
+
+\subsubsection{Noise reduction through compression}
+Lossy compression methods invariably lose some of the original
+information. However, it is often the case that the result is a
+reconstruction that is {\em closer} to the true underlying real-world
+values than the original measurements. How can that be?
+
+Consider a temperature guage in a room that is taking a measurement
+ten times per second. Suppose also that each measurement is the sum of
+the true temperature and measurement noise with a variance of one
+degree.  It is clear that replacing blocks of 10 consecutive
+measurements by their average is lossy in terms of the original
+signal. However, at thge same time, it is closer to the true
+measurements. It is not uncommon that compression methods that
+incorporate good model of the underlying real-world process can
+actually {\em clean} the raw measurements.
+
+\subsubsection{Incremental models}
+A powerful way of building compression methods is based on iterative
+compression of the residual. Using the notation above, the residual is 
+$r_i=x_i - \hx_i$. We expect the resudual to be small.}
+
 \eat{
 \reminder{skip this subsection. may become irrelevant due to the increasing depth representation discussed in the query processing}
 The model administrator can choose more or less compressed model alternatives. The choice presents a speed-accuracy trade-off: Noise-reducted model alternatives will enable precise query answers but at the cost of speed, since their representations will be relatively large. In contrast, 
