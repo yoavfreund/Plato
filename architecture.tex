@@ -2,11 +2,28 @@
 % light integration of models with relational data Vs deep integration
 % UDFs: is it like a UDF or is it a UDF? Are tables with UDFs allowed to have code + data.
 
+\section{Models}
+\label{sec:models}
+
+\reminder{To Yannis P: I changed $\mathcal{\bar{D}}$ to $\mathcal{D}$, due to the reasons we discussed. Similarly for $\mathcal{\bar{Q}}$.}
+
+The proposed Plato database aims to solve the discussed problems by introducing models as first class citizens. In this section we formally define models and discuss the criteria that can be used to compare two models.
+
+A model is a mathematical representation of the world that predicts a quantity of interest (e.g., temperature) at every point of the spatiotemporal domain.
+In the basic case, a {\em model} is a continuous function $f:\mathcal{D}\mapsto \mathcal{Q}$ from a (generally multidimensional) spatiotemporal domain $\mathcal{D}$ to $\mathcal{Q}$. In this work we consider function domains $\mathcal{D}$ that are subspaces of four-dimensional spatiotemporal domain (that includes the three space dimensions and the temporal dimension). For instance, it can be a sphere of $(x, y, t)$ points around a center $(x_0, y_0, t_0)$, a square of $(x, y)$ points, etc.
+
+\vspace*{0.5cm}
+\begin{example}
+For instance, a model for temperature can be a function $f:D_{t\_2012\_now}\mapsto Q_{float}$, which given a point in time $t$ between 2012 and now returns a float, corresponding to the \emph{predicted} temperature at time $t$.
+\end{example}
+\vspace*{0.5cm}
+
 \section{Plato: An extensible model-aware database}
 \label{sec:architecture}
-The proposed Plato database aims to solve the discussed problems by introducing models as first class citizens. This section provides the basic definitions, architecture (Figure~\ref{fig:basic-architecture}) and examples.
 
-We assume that raw sensor data measurements are stored in conventional SQL tables, which we refer to as {\em measurements tables}. Every measurements table contains among others a subset of the spatiotemporal attributes $X$, $Y$, $Z$ and $T$ (representing the three spatial dimensions and the temporal dimension, respectively).
+Platon facilitates the integration of models in a general database system by adopting the architecture shown in Figure~\ref{fig:basic-architecture} and discussed next.
+
+Raw sensor data measurements are stored in conventional SQL tables, which we refer to as {\em measurements tables}. Every measurements table contains among others a subset of the spatiotemporal attributes $X$, $Y$, $Z$ and $T$ (representing the three spatial dimensions and the temporal dimension, respectively).
 
 \vspace*{0.5cm}
 \begin{example}
@@ -17,26 +34,17 @@ Attribute \texttt{Sensor} is a foreign key to another table \texttt{temp\_sensor
 \end{example}
 \vspace*{0.5cm}
 
-To facilitate easy data analysis, the model administrator can build models on top of the raw sensor data. A model is a mathematical representation of the world that predicts a quantity of interest (e.g., temperature) at every point of the spatiotemporal domain.
-In the basic case, a {\em model} is a continuous function $f:\mathcal{\bar{D}}\mapsto \mathcal{Q}$ from a (generally multidimensional) spatiotemporal domain $\mathcal{\bar{D}}$ to $\mathcal{Q}$. The domain $\mathcal{\bar{D}}$ is in general a subspace of the entire four-dimensional spatiotemporal domain. For instance, it can be a sphere of $(x, y, t)$ points around a center $(x_0, y_0, t_0)$, a square of $(x, y)$ points, etc.
+To facilitate easy data analysis, the model administrator can build models on top of the raw sensor data. To generate a model, the model administrator can utilize {\em learning algorithms}, which take as input the raw data and potentially external knowledge about them and return a model. Learning algorithms are designed by domain specialists, who have knowledge of the domain and the underlying physical properties of the sensor data. For instance, weather experts can design a weather learning algorithm. Although some of the learning algorithms will be domain specific (such as the weather example above), others are general algorithms proposed in the machine learning literature \reminder{Yoav, can you please add a reference?} and shown to be applicable to a wide range of domains. This includes among others algorithms for learning an ARMA mode (which is suitable for readings from sensors measuring natural phenomena, such as temperature), a PCA model (Principal Component Analysis) etc. To bootstrap the system and facilitate the quick generation of models for many common use cases, Plato comes preloaded with several such learning algorithms.
+
+A learning algorithm $g$ has the general form of $g(R;p)$, taking as input a measurements table $R$ and a tuple $p$ of parameter values.
 
 \vspace*{0.5cm}
 \begin{example}
-For instance, a model for temperature can be a function $f:D_{t\_2012\_now}\mapsto Q_{float}$, which given a point in time $t$ between 2012 and now returns a float, corresponding to the \emph{predicted} temperature at time $t$.
-\end{example}
-\vspace*{0.5cm}
-
-To generate a model, the model administrator can utilize {\em model generators}, which take as input the raw data and potentially external knowledge about the data and return a model. Model generators are designed by domain specialists, who have knowledge of the domain and the underlying physical properties of the sensor data. For instance, weather experts can design a weather model generator. Although some of the model generators will be domain specific (such as the weather example above), other model generators are more general and have a wide applicability to large range of domains. This includes among others an ARMA model generator (which is suitable for readings from sensors measuring natural phenomena, such as temperature), a PCA (Principal Component Analysis) model generator and other model generators proposed in the statistical literature. \reminder{Add reference}. To bootstrap the system and facilitate the quick generation of models for many common use cases, Plato comes preloaded with several such model generators.
-
-A {\em model generator} $g$ has the general form of $g(R;p)$, taking as input a measurements table $R$ and a tuple $p$ of parameter values.
-
-\vspace*{0.5cm}
-\begin{example}
-For instance, the model generator $arma(R;<Attr_{cont}; Attr_{meas}>)$ takes as input a measurements table $R$ together with the sets $Attr_{cont}$, $Attr_{meas}$ of attributes of $R$ that correspond to the spatiotemporal attributes and measurement attributes of $R$, respectively and creates an ARMA model $f:\mathcal{\bar{D}}\mapsto\mathcal{\bar{Q}}$, where $\mathcal{\bar{D}}$ is the subspace of the spatiotemporal domain defined by attributes $Attr_{cont}$ and $\mathcal{\bar{Q}}$ is the equal to $Q_1 \times Q_2 \ldots \times Q_n$, where $Q_i$ the domain of the $i$-th attribute in $Attr_{meas}$. \reminder{Which additional parameters should we include to the ARMA model generator's signature to make it generally applicable?}
+For instance, the learning algorithm $arma(R;<Attr_{cont}; Attr_{meas}>)$ takes as input a measurements table $R$ together with the sets $Attr_{cont}$, $Attr_{meas}$ of attributes of $R$ that correspond to the spatiotemporal attributes and measurement attributes of $R$, respectively and creates an ARMA model $f:\mathcal{D}\mapsto\mathcal{Q}$, where $\mathcal{D}$ is the subspace of the spatiotemporal domain defined by attributes $Attr_{cont}$ and $\mathcal{Q}$ is the equal to $Q_1 \times Q_2 \ldots \times Q_n$, where $Q_i$ the domain of the $i$-th attribute in $Attr_{meas}$. \reminder{Which additional parameters should we include to the ARMA learning algorithm's signature to make it generally applicable?}
 \end{example}  
 \vspace*{0.5cm}
 
-Models created through model generators can be used as values in tables. To this end, Plato extends SQL's data types (e.g., string, integer, etc.), with a new {\em model data type} that comes with an associated model signature $\mathcal{\bar{D}}\mapsto \mathcal{Q}$. An attribute of such a type is called a {\em model attribute} and accepts as values models conforming to the corresponding function signature. We will refer to a table that contains at least one model attribute as a {\em model table}. Model tables are defined by SQL view definitions that involve {\em model generator} functions. 
+Models created through learning algorithms can be used as values in tables. To this end, Plato extends SQL's data types (e.g., string, integer, etc.), with a new {\em model data type} that comes with an associated model signature $\mathcal{D}\mapsto \mathcal{Q}$. An attribute of such a type is called a {\em model attribute} and accepts as values models conforming to the corresponding function signature. We will refer to a table that contains at least one model attribute as a {\em model table}. Model tables are defined by SQL view definitions that involve {\em learning algorithm} invocations. 
 
 \vspace*{0.5cm}
 \begin{example}
@@ -46,20 +54,20 @@ For instance, in order to create a model table, containing sensor IDs and an ARM
 
 \begin{verbatim}
 CREATE MATERIALIZED VIEW sensor_models AS 
-SELECT sensor, arma(G; T; Temp) AS temp_model
+SELECT sensor, arma(G; T; Temp) AS model
 FROM temp_meas GROUP BY sensor AS G(T, Temp)
 \end{verbatim}
 
 Note that for ease of exposition, we use an extension of SQL that allows the generation of nested relational tables.\footnote{Extending SQL to nested tables has been a well-studied topic in the database management field and recently it is featured in multiple ``Big Data" databases that feature semistructured models. 
 }
-In particular the GROUP BY operator creates for each sensor appearing the the measurements table \texttt{temp\_meas} a nested table $G$ containing all measurements for the particular sensor. These measurements are given as input to the ARMA model generator to create the corresponding ARMA model.
-The resulting model table \texttt{sensor\_models(sensor, temp\_model)} contains tuples of the form $(s, f)$, where $s$ is a sensor and $f$ the corresponding temperature ARMA model.
+In particular the GROUP BY operator creates for each sensor appearing the the measurements table \texttt{temp\_meas} a nested table $G$ containing all measurements for the particular sensor. These measurements are given as input to the ARMA learning algorithm to create the corresponding ARMA model.
+The resulting model table \texttt{sensor\_models(sensor, model)} contains tuples of the form $(s, f)$, where $s$ is a sensor and $f$ the corresponding temperature ARMA model.
 \end{example}
 \vspace*{0.5cm}
 
 A model table may be virtual in the sense that SQL view definitions are virtual, i.e., no actual computation is performed until a query uses them. However, in practice, the administrator is motivated to materialize models (and the  respective model tables) in order to benefit from the data compression that models enable. This can be achieved by adding the MATERIALIZED keyword in the view definition as shown above.
 
-Note, that the administrator has in general to choose in general between multiple model generators, which come with different compression levels and corresponding guarantees regarding information preservation. Indeed, a major research issue, discussed in Section~\ref{sec:model-generators}, is the semiautomation of the choice of model generators, which should take into consideration the query/analytics workload.
+Note, that the administrator has in general to choose in general between multiple model algorithms, which come with different compression levels and corresponding guarantees regarding information preservation. Indeed, a major research issue, discussed in Section~\ref{sec:model-generators}, is the semiautomation of the choice of model algorithms, which should take into consideration the query/analytics workload.
 
 \vspace*{0.5cm}
 \begin{example}
@@ -77,7 +85,7 @@ The reasons for doing so could be: (a) The individual sensor models may be heavi
 
 %\paragraph{Vector quantities} In the general case, a model's quantity is a vector (rather than a scalar) from the domain $\mathcal{\bar{Q}}$.
 
-\paragraph{Probabilistic model tables} In the general case a model returns probability distributions of the quantities, rather than absolute values. Therefore a model is a function $f:\mathcal{\bar{D}}\mapsto \mathcal{H_{\bar{Q}}}$, where $\mathcal{H_{\bar{Q}}}$ is the space of probability distributions over the quantity domain $\mathcal{\bar{Q}}$. The probability distributions capture the certainty of the predicted values.  For example, the model of Example~\ref{xmpl:models-and-definitions} can easily benefit from returning probability distributions of the predicted temperatures. A key use case is that the probability distributions indicate how certain one is about the confidence intervals of the predicted quantities.
+\paragraph{Probabilistic model tables} In the general case a model returns probability distributions of the quantities, rather than absolute values. Therefore a model is a function $f:\mathcal{D}\mapsto \mathcal{H_{Q}}$, where $\mathcal{H_{Q}}$ is the space of probability distributions over the quantity domain $\mathcal{Q}$. The probability distributions capture the certainty of the predicted values.  For example, the model of Example~\ref{xmpl:models-and-definitions} can easily benefit from returning probability distributions of the predicted temperatures. A key use case is that the probability distributions indicate how certain one is about the confidence intervals of the predicted quantities.
 
 %\paragraph{Viewing models as infinitely-sized tables} Notice that a model $f:\mathcal{\bar{D}}\mapsto \mathcal{H_{\bar{Q}}}$ can be also perceived as a table $R_f(\bar{D}, \bar{Q}, H)$, where the table has an infinite number of tuples, the coordinates $\bar{D}$ form a key and the attribute $H$ provides the value of the probability distribution at the specific coordinates.
 %Correspondingly, the models that are the values of a table's attribute can be perceived as infinite size nested tables.%
@@ -89,10 +97,39 @@ The reasons for doing so could be: (a) The individual sensor models may be heavi
 \label{sec:queries}
 A key success factor of database systems has been the declarative SQL query language where the user/developer expresses the desired result of his analysis without having to specify the algorithm that computes this result and without having to refer to the data structures where the data are stored. The database discovers the optimal plan to compute the result, making best use of the available data structures. 
 
-In the spirit of declarative programming, Plato offers two categories of SQL extensions that enable model-related computations, while Plato utilizes model-specific rewritings to optimize the computation. 
+In the spirit of declarative programming, Plato offers an extension of SQL that enables computations involving models. A data analyst can query models in two ways, corresponding to queries of different granularities.
+
+At the coarsest granularity, he can query models as black boxes by employing in the query predefined functions that take as input one or more models and return a scalar, vector or even a new model. Examples of such functions are functions computing statistical properties of models, such as the correlation between a model or the autocorrelation within a model. Plato will support many common such functions, while additional functions can be added through a suitable interface.
+
+\vspace*{0.5cm}
+\begin{example}
+The function $correlation(M1, M2)$ takes as input two models $M1$ and $M2$ and computes their correlation. Continuing our running example, one can utilize this function to compute all pairs of sensors whose models have a strong (i.e., greater than 0.9) correlation as follows:
+\begin{verbatim}
+SELECT sm1.sensor, sm2.sensor
+FROM sensor_models AS sm1, sensor_models AS sm2
+WHERE correlation(sm1.model, sm2.model) > 0.9 
+\end{verbatim}
+\end{example}
+\vspace*{0.5cm}
+
+\reminder{Need to motivate the split into two query language extensions} An alternative way of accessing the models is by considering them as nested tables and using an extension of SQL suited for querying nested relational models. In particular, a model $f: \mathcal{D} \mapsto \mathcal{Q}$ from vector $(x, y, z, t)$ to vector $(q_1, q_2, \ldots q_n)$ can be seen as a table of schema $f(X, Y, Z, T, Q_1, Q_2, \ldots, Q_n)$, where $(X, Y, Z, T)$ is a primary key. Moreover, conceptually contains a single tuple for each value in $\mathcal{D}$. \reminder{Need to fix the transition from domains to attributes.} Since the latter is in general infinite, the model is also exposed to the data analyst as an infinite relation. This infinite relation can be queried through SQL queries (extended to account for nested relations).
+
+\vspace*{0.5cm}
+\begin{example}
+For instance, each ARMA model in our running example can be seen as a table over schema (T, Temp). Thus the model table \texttt{sensor\_models} defined above is a table over schema $sensor\_models(sensor, (T, Temp))$, where $(T, Temp)$ is the schema of the nested table corresponding to the model. Using this representation, we can ask for the temperature of all sensors at midnight of 01/01/2014 through the following query:
+
+\begin{verbatim}
+SELECT sm1.sensor, m1.Temp
+FROM sensor_models AS sm1, sm1.model AS m1
+WHERE T = 2014/01/01#00:00:00
+\end{verbatim}
+\end{example}
+\vspace*{0.5cm}
+
+\reminder{Add discussion on safe queries}
 
 Unlike conventional query optimization, where the rewritings produce equivalent expressions, opportune rewritings in model-based databases are not guaranteed to produce queries with identical results. Rather, in many important cases the results are guaranteed to be equivalent under common assumptions of statistical signal processing. In other cases, they are guaranteed to be equivalent within certain error bounds. Plato queries allow the user to specify the requested guarantee by providing appropriate parameters.
 
-The first category utilizes various functions that input models and output statistic measures or models. The second category allows variables that range over the infinitely-many coordinate points. 
+%The first category utilizes various functions that input models and output statistic measures or models. The second category allows variables that range over the infinitely-many coordinate points. 
 
 

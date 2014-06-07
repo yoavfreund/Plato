@@ -9,6 +9,10 @@ As is well known from signal processing, relatively few model classes, such as A
 
 \subsection{Choosing model alternatives}
 \label{sec:choosing-model-alternatives}
+
+\reminder{To Yoav: Please add discussion on the following: (a) Lossless: Does not achieve significant compression, (b) Noise-reducted lossy, (c) Additive hierarchy of (b)}
+
+\eat{
 \reminder{skip this subsection. may become irrelevant due to the increasing depth representation discussed in the query processing}
 The model administrator can choose more or less compressed model alternatives. The choice presents a speed-accuracy trade-off: Noise-reducted model alternatives will enable precise query answers but at the cost of speed, since their representations will be relatively large. In contrast, 
 lossy model alternatives will lead to very fast queries but at the cost of query answer accuracy. Plato will provide a {\em model administrator assistant} module that semiautomates the process of choosing the appropriate model representation by solving the following problems.
@@ -29,5 +33,8 @@ In the simplest setting, the assistant is given
 \item a single query $Q$ that uses a model $f$ and a specification of the desired accuracy of the result.
 %
 \end{enumerate}
+}
 
 \subsection{Adjusting to filtering needs}
+
+\reminder{To Yannis K: Add discussion explaining which models are good for pushing selections down}
