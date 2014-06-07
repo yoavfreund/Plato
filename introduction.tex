@@ -1,12 +1,77 @@
+
+\eat{
+The analysis of sensor data has traditionally been the domain of
+signal processing or specialized areas such as image and video
+processing, audio processing, MRI, ultrasound, Seismology and the
+like. In general, most of the focus is on the real-time analysis and
+compression and reconstruction of the signals.
+
+These approaches, while very successful in specialized domain, do not
+scale well to sensor networks that contain a large number of sensors
+of diverse types that collect data over a period of years. In order to
+make it possible to access such data collections efficiently we
+propose to use abstractions and techniques from the field of
+data-bases.
+
+}
+
+\paragraph{The healthy aspects of SQL databases in analytics}
+%SQL systems have been a success in BI, OLAP...
+Since the 80s SQL database systems gradually became the cornerstone of the vast majority of Business Intelligence (BI) and On Line Analytical Processing (OLAP) applications. Their success is primarily attributed to {\em declarative querying (via SQL)}, {\em automatic query optimization} and the {\em physical-logical independence}. In a typical database-driven application architecture (see Figure~\ref{fig:db-driven-arch}), the business intelligence application issues an SQL query over tables. The tables are {\em logical} in the sense that they are just mathematical relations, while the underlying storage, clustering and indexing details constitute a {\em physical} layer, whose knowledge is not needed for writing queries. The queries are declarative in the sense that they only describe the desired result without describing the algorithm that computes the result. A query optimizer automatically decides which is the best plan for executing the query, taking into consideration the physical organization of the storage. A database administrator may alter the data structures and indices from time to time in order boost the performance of the observed workload. However, logical/physical separation says that such data representation, fine-tuning changes at the ``physical" level do not require rewriting of the logical layer. Rather, the query processing speed will automatically benefit.
+
+% parallel
+
+% logical-physical separation is pushed even further by auto-administrated systems \cite{}.
+
+\reminder{to Yannis P, introduce the following at the point where models emerge as added-value views:
+Further levels of abstraction are achieved with {\em views}, which are tables that capture the result of filtering, combining and aggregating the data of the logical tables in a way that simplifies the queries issued by the applications.
+}
+
+\paragraph{The failures of SQL databases in spatiotemporal sensor data analytics}
+%SQL systems fail in sensor data analytics
+SQL systems fail in the space of predictive analytics involving sensors that generate measurements in the space and time dimensions.%
+\footnote{Indeed, one may argue that some of the discussed failures and respective remedies proposed by Plato, also apply to predictive analytics of non-sensor, non-spatiotemporal data. Nevertheless, the focus of this project is exclusively on spatiotemporal sensor data.
+}
+Next, we argue that at the core of the failures of SQL databases is the fact that they lack a critical abstraction, which is the {\em Real World Model}.%
+\footnote{The real world model is frequently called the ``physical model" as it corresponds to the physics of the real world. This proposal uses the term ``real world model" (instead of the term ``physical model") to avoid the confusion caused by the two different meanings of the word ``physical" in the sensors' signal processing and the database community.
+}
+Then we argue next that this omission leads to multiple failures: Tedious programming and system integration, lack of abstractions, which requires developers/analysts to jungle the high level, where they think of statistics, such as the correlation of two signals, with the low level programming where they deal with the specifics of the model. The second failure is that often the massive amounts of measurements are used directly in the statistics, leading to a performance waste.
+
+In general, the data contained in an SQL database have a one-to-one mapping to the captured real world objects and events. For example, a database may represent persons, which have an address, a name and a telephone number. Each represented person is supposed to be a corresponding unique entity in the world. Vice versa, as far as the database and the applications running on it are concerned, the represented entities, attributes and relationships constitute the entire real world of interest. On the other hand, the sensor data are mere samples (measurements) of the reality. The full reality of interest to the applications is captured by models that predict the quantity of interest at each point in a range of time and possibly also in an area of space. In practice, the gap between the measurements and the real world models is best crossed by learning algorithms that discover the parameters of the real world model. 
+
+\eat{
+meaningful events in a video recoding from a webcam
+positioned over a highway are {\em not} the pixel values. The
+meaningful events might be the number of vehicles in view, the speed
+of vehicles in each lane or license plate numbers of the vehicle.
+The entities in the real world do no relate to any individual pixel or
+even group of pixels. They relate to {\em patterns} that appear across
+different pixels at different times. It is by finding these patterns
+that we can extract useful information from the video.
+}
+
+While databases are often used to store sensor measurements, their deficiency in capturing real world models as a first class citizen leads to tedious analytics processes: Given an analytics request, one has to first issue queries that retrieve the relevant measurements. Then she deploys signal processing learning algorithms on them to compute the model's parameters. Finally,  the (typically statistical) analysis is often performed over the model and its results are moved into the database.
+
+In recent years databases have been extended (typically via UDFs) with machine learning procedures that can allow one to execute such procedures without moving data in-and-out of the database. While such extensions are useful, we argue next that they miss the optimization opportunities that become available once models appear in the database as first class citizens and the query language and query processing are adjusted accordingly.
+
+The net effect is that analytics on spatiotemporal sensor data currently require the involvement of developers who are essentially skilled in all of the (a) data filtering and combining, (b) modeling, and (c) low level data representation and related algorithms. 
+
+
+\begin{figure}
+{\bf the conventional database-driven analytics architecture illustrating declarative query and optimizer that automatically finds how to utilize the data structures best.}
+\caption{Database-driven analytics architecture}
+\label{fig:db-driven-arch}
+\end{figure}
+
 \reminder{REMINDERS ON POINTS FOR INTRODUCTION}
 
 \paragraph{Problems of current approaches to combining databases with statistical signal processing}
 \begin{itemize}
-\item Statistics and predictive analytics involve a tedious process where data are moved out of databases into statistical processing software (eg R) and then stored back.
+\item (Done) Statistics and predictive analytics involve a tedious process where data are moved out of databases into statistical processing software (eg R) and then stored back.
 %
 \item None of the cornerstones of the success of SQL systems is available: No logical/physical separation, no declarative queries and no automatic optimization of storage and query processing.
 %
-\item Spatiotemporal sensor data are qualitatively different in a way that prevents the direct use of SQL, which has been tuned for discrete precise data: Unlike ERP and CRM business use cases, where the database data constitute the world, sensor data are mere measurements of the real world - potentially imprecise. Models (continuous functions over space and time) are the actual representation of the world and predict values at any coordinate. Query languages and database modeling has to facilitate the use of predicted values.
+\item (Done) Spatiotemporal sensor data are qualitatively different in a way that prevents the direct use of SQL, which has been tuned for discrete precise data: Unlike ERP and CRM business use cases, where the database data constitute the world, sensor data are mere measurements of the real world - potentially imprecise. Models (continuous functions over space and time) are the actual representation of the world and predict values at any coordinate. Query languages and database modeling has to facilitate the use of predicted values.
 %
 \item Sensor data are unnecessarilly big in their raw form. Yet signal processing research has known for long that data can be split into signal and the often unimportant noise, leading to high effective lossless compression. 
 %
