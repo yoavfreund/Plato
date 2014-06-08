@@ -70,8 +70,16 @@ ten times per second. Suppose also that each measurement is the sum of
 the true temperature and measurement noise with a variance of one
 degree.  It is clear that replacing blocks of 10 consecutive
 measurements by their average is lossy in terms of the original
-signal. However, at thge same time, it is closer to the true
-measurements. It is not uncommon that compression methods that
+signal. However, at the same time, it is closer to the true
+measurements. This noise reduction is based on our assumption that
+room temperature rarely changes significantly in a tenth of a
+second. Therefor any rapid variations in the measured temperature is
+likely to be an artifact of the sensor rather than anything real.
+
+
+White noise, formally known as the Weiner process
+
+It is not uncommon that compression methods that
 incorporate good model of the underlying real-world process can
 actually {\em clean} the raw measurements.
 
