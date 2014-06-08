@@ -9,11 +9,17 @@ However, SQL systems fail in the space of predictive analytics that involve sens
 Section~\ref{sec:the-failure} argues that at the core of the failure of SQL databases in the management and analytics of sensor spatiotemporal data is the lack of a critical abstraction, which is the {\em real world model}.%
 \footnote{The real world model is frequently called the ``physical model" as it corresponds to the physics of the real world. This proposal uses the term ``real world model" (instead of the term ``physical model") to avoid the confusion caused by the two different meanings of the word ``physical" in the sensors' signal processing and the database community.
 }
-The signal processing area has deeply built in its foundations the real world model concept, whuch leads to great results in the cleaning, compression and reconstruction of signals. However, this area's approaches have been directly applicable only to problems with (a) low diversity of data (e.g., when the entire data set of interest comes from a single type of sensor and there are no ``metadata" and/or other alphanumeric data to provide context to the sensor data analysis and its results) and (b) low volume of data, with no complex needs on how to effectively persist the data set over time. 
+The signal processing area has deeply built in its foundations the real world model concept, which leads to great results in the cleaning, compression and reconstruction of signals. However, this area's approaches have been directly applicable only to problems with (a) low diversity of data (e.g., when the entire data set of interest comes from a single type of sensor and there are no ``metadata" and/or other alphanumeric data to provide context to the sensor data analysis and its results), (b) low volume of data, with no complex needs on how to effectively persist the data set over time and (c) a single type of ``hardwired" analysis. 
 % Furthermore they require highly knowledgeable signal processing experts, who must combine statistics.
-Currently there is a split between database systems and signal processing. When the two are combined, the combination is based on low productivity, ad-hoc practices. Such practices do not scale in scenarios where many diverse types of data must be quickly analyzed. 
+It is apparent that databases and signal processing techniques should be coupled but, unfortunately, currently they do not mix well. The result is reduced productivity, very high requirements on the analysts (must be simoultaneously experts in signal processing, statistics and big data management) and projects that cannot easily incorporate many types of data and many types of analysis.
 
-Section~\ref{sec:plato} introduces the proposed Plato database system, which brings the real world model concept into SQL databases, therefore combining the healthy productivity aspects of SQL systems with the benefits of signal processing techniques.
+Section~\ref{sec:plato} introduces the proposed Plato database system, which brings the real world model concept into SQL databases, therefore combining the healthy productivity aspects of SQL systems (declarative queries, multiple levels of abstraction, automated optimization) with the sensor data processing benefits of signal processing techniques.
+
+Section~\ref{sec:noise-reducted} argues that the noise-reducted, additive models that can be derived from common learning algorithms (in the field of signal processing) confer both a data quality benefit and a huge efficiency benefit, by virtue of providing very compressed representations of the model. Query processing algorithms can run directly on these compressed representations.
+
+% Incremental maintenance
+Section~\ref{sec:}
+
 
 \subsection{The healthy aspects of SQL databases in analytics}
 \label{sec:healthy-aspects}
@@ -44,6 +50,8 @@ Given an analytics request, one has to first issue queries that retrieve the rel
 The healthy aspects of SQL database systems discussed in Section~\ref{sec:healthy-aspects} are no longer observed. Instead, the above process is characterized by low productivity as data move  in an out of the database. Furthermore, unlike the ecosystem of conventional SQL systems, the analysts of sensor data must be experts of many areas: signal processing, statistics, databases and often big data management and processing. As sensor data proliferate, the short supply of such multiarea experts and the low productivity in developing and maintaining sensor analytics will lead to a world where a lot of sensor data will be collected but only limited analysis will be performed at them, at the cost of missing the insights that these data can offer.
 
 % One stupid approach: Work directly with the measurements
+
+% Currently there is a split between database systems and signal processing. When the two are combined, the combination is based on low productivity, ad-hoc practices. Such practices do not scale in scenarios where many diverse types of data must be quickly analyzed. 
 
 In recent years databases have been extended (typically via UDFs) with machine learning procedures that can allow one to execute such procedures without moving data in-and-out of the database. While such extensions are useful, we argue next that they miss the optimization opportunities that become available once models appear in the database as first class citizens and the query language and query processing are adjusted accordingly.
 
@@ -84,11 +92,6 @@ The larger benefit of a Plato model (and the also the reason for naming the proj
 
 \paragraph{Problems of current approaches to combining databases with statistical signal processing}
 \begin{itemize}
-\item (Done) Statistics and predictive analytics involve a tedious process where data are moved out of databases into statistical processing software (eg R) and then stored back.
-%
-\item None of the cornerstones of the success of SQL systems is available: No logical/physical separation, no declarative queries and no automatic optimization of storage and query processing.
-%
-\item (Done) Spatiotemporal sensor data are qualitatively different in a way that prevents the direct use of SQL, which has been tuned for discrete precise data: Unlike ERP and CRM business use cases, where the database data constitute the world, sensor data are mere measurements of the real world - potentially imprecise. Models (continuous functions over space and time) are the actual representation of the world and predict values at any coordinate. Query languages and database modeling has to facilitate the use of predicted values.
 %
 \item Sensor data are unnecessarilly big in their raw form. Yet signal processing research has known for long that data can be split into signal and the often unimportant noise, leading to high effective lossless compression. 
 %
@@ -98,11 +101,7 @@ The larger benefit of a Plato model (and the also the reason for naming the proj
 
 \begin{itemize}
 %
-\item Plato brings models in the database. Models are continous functions that predict the quantity of interest at any coordinate. A model introduces knowledge of the external physical reality.
-%
 \item Well-developed theory and set of models and model generators that effectively capture many real world cases.
-%
-\item Holds promise to solve the problems above. Plato enables declarative queries and automatic optimization of storage and query processing.
 %
 \end{itemize}
 
@@ -145,3 +144,11 @@ The larger benefit of a Plato model (and the also the reason for naming the proj
 
 
 \paragraph{Approximate query processing}
+
+\section{Broad Impact}
+\label{sec:broad-impact}
+
+
+\section{Intellectual Merit}
+\label{sec:intellectual-merit}
+
