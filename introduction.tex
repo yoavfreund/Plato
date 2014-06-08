@@ -37,7 +37,6 @@ consideration the physical organization of the storage. A database
 administrator may alter the data structures and indices from time to
 time in order boost the performance of the observed workload. However,
 logical/physical separation dictates that fine-tuning changes at the ``physical" level do not require rewriting of the logical layer. Rather, the query processing speed will automatically benefit.
-<<<<<<< HEAD
 >>>>>>> 50bb71c4dc192ebf049064635822625d3bb6b25b
 
 
@@ -46,14 +45,6 @@ logical/physical separation dictates that fine-tuning changes at the ``physical"
 In a typical database-driven application architecture (see Figure~\ref{fig:db-driven-arch}), the business intelligence application issues an SQL query over tables. As far as the application is concerned, the tables are {\em logical} in the sense that they are just mathematical relations. In contrast, the underlying data structures where the tables are stored, as well as the indices on the tables, constitute the {\em physical} layer, whose knowledge is not needed for writing queries. The queries are declarative in the sense that they only describe the desired result without describing the algorithm that computes the result. A query optimizer automatically finds a good plan (in effect, algorithm) for executing the query, taking into consideration the specifics of the physical layer. Declarativeness and automatic optimization increase {\em developer productivity} and {\em lower the sophistication bar} needed for writing analytics. Furthermore, they are a key enabler behind visual OLAP systems, where the (non-programming) user can easily aggregate, correlate, drill-down in the data, pivot, etc. Such systems (e.g., Cognos, Microstrategy) faced the relatively easy task of translating clicks into declarative queries, while the problem of optimizing these queries was left to the database.
 
 \reminder{to Yannis P: The full truth is that also provided solutions to the problem of adding materialized views, which is actually connected to the problem of materializing models.
-=======
-
-% parallel
-
-% logical-physical separation is pushed even further by auto-administrated systems \cite{}.
-
-\reminder{to Yannis P, introduce the following at the point where models emerge as added-value views:
->>>>>>> 50bb71c4dc192ebf049064635822625d3bb6b25b
 Further levels of abstraction are achieved with {\em views}, which are tables that capture the result of filtering, combining and aggregating the data of the logical tables in a way that simplifies the queries issued by the applications.
 }
 
