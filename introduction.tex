@@ -61,40 +61,30 @@ Recent research systems have expanded SQL databases to probabilistic facts (as o
 \subsection{Plato: Models as a first class citizen of the database and query language}
 \label{sec:plato}
 The proposed Plato database has models as a ``first class citizen" abstract type of the database. If we neglect the stochastic aspect of the data, a Plato model is a continous function over time and/or space that predicts a quantity of interest (eg, temperature, velocity, acceleration, air pollutants density etc) at any coordinate in a certain time/space area. Alternately, a database-minded person may perceive a Plato model as a table whose attributes are time and/or space coordinates and one or more types of quantities. The table has infinitely many tuples and the time/space coordinates form a key, i.e.,  given values for the time/space coordinates, each quantity has a unique associated value. 
-In order to capture the stochastic aspect of a process, Plato assumes that the process may be described by multiple functions and each function is assigned a probability.
+In order to capture the stochastic aspect of a process, Plato further assumes that the process may be described by multiple functions, where each function is assigned a probability.
 
 % Queries that one can write.
 % Challenge: develop the query languages
 
-Consequently, Plato expands the applicability of the successful architecture of Figure~\ref{fig:db-driven-arch} into statistical, spatiotemporal sensor data management and analytics. The application issues declarative ``Plato SQL" queries, which utilize the models without being concerned about the specifics of how the models are actually represented in the storage nor the intricacies of how to most efficiently execute the queries. The following sections provide multiple examples of Plato SQL queries. In one example, a query predicts quantities at specific coordinates. In another example, models are correlated. In a third example, queries drill into specific time segments of the models; e,g., the afternoon times. In yet another example, models capturing the daily paths of individual persons are composed with models that provide the distribution of atmospheric polutants in San Diego County and the result is models of the polutant levels that these persons breathed; the query that composes the models is essentially just a simple SQL join. These model-related queries are seamlessly combined with the rest of the database, therefore making it easy to draw results about various segments of the entities represented in the database. For example, a single query can test an hypothesis regarding the inhalation of an atmospheric polutant by individuals and the asthma attack incidents (as recorded in the conventional medical record) of those indviduals.
+Consequently, Plato expands the applicability of the successful architecture of Figure~\ref{fig:db-driven-arch} into statistical, spatiotemporal sensor data management and analytics. The application issues declarative ``Plato SQL" queries, which utilize the models without being concerned about the specifics of how the models are actually represented in the storage nor the intricacies of how to most efficiently execute the queries. (Representation in storage and efficient query execution is introduced next, in Section~\ref{sec:reduced-noise-additive}). \reminder{to YK: place section reference. Check whether these are still the examples we have. I do not mind switching the following to the examples you wrote.} Section~\ref{sec:} provide multiple examples of Plato SQL queries. In one example, a query predicts quantities at specific coordinates; in the stochastic counterpart of the example, the query also asks for the confidence interval, given pi value 0.05. In another example, models are correlated. In a third example, queries drill into specific time segments of the models; e,g., the afternoon times. In yet another example, models capturing the daily paths of individual persons are composed with models that provide the distribution of atmospheric polutants in San Diego County and the result is models of the polutant levels that these persons breathed; the query that composes the models is essentially just a simple SQL join. These model-related queries are seamlessly combined with the rest of the database, therefore making it easy to draw results about various segments of the entities represented in the database. For example, a single query can test an hypothesis regarding the inhalation of an atmospheric polutant by individuals and the asthma attack incidents (as recorded in the conventional medical record) of those indviduals.
 
-\reminder{the next is rough}
+\subsection{Reduced-noise, additive model representations towards data quality and processing speed}
+\label{sec:reduced-noise-additive}
+\reminder{Sensor data are unnecessarilly big in their raw form. Yet signal processing research has known for long that data can be split into signal and the often unimportant noise, leading to high effective lossless compression.
+}
+Obviously, the {\em storage-level representation} (from now on called simply {\em representation}) of the models cannot be the infinitely many possible coordinates and their associated quantities. Fortunately, vast prior work in signal processing research teaches a fruitful connection between good models and high compression. Good models can be represented to high accuracy with much fewer data (model components) than the original measurements data. 
+\reminder{to YK, YF: everyone ok with above use of ``model components" for the specific data of the model representation}
+Intuitively, the effectiveness of such representations is connected to the physics of the signals. For example, the frequency domain representations generated by Fourier and wavelet transforms capture the periodicity of certain signals. In another example, ARMA models capture the differential equations that govern the connection between neighbor points in time and space.
 
-\subsection{Noise-reducted, additive model representations towards data quality}
-Obviously, the {\em storage-level representation} (from now on called simply representation) of the models cannot be the infinetly many possible coordinates and their associated quantities. Rather, vast prior work in signal processing research teaches 
+Plato will be based on a particular variation of models and model representations. The model representation will be {\em additive}, in the sense that the first bits of the representation will provide the most dominant components. Subsequent bits will provide decreasingly important model components. This approach raises the opportunity for a new type of top-k algorithms \cite{Fagin}, which read just enough model components to achieve the level of confidence required by the query.
 
-The effectiveness of such representations is connected to the physics of the signals. For example, the frequency domain representations generated by Fourier transforms capture the periodicity of certain signals. In another example, ARMA models capture the differential equations that govern the connection between neighbor points in time and space.
-
-Plato's query language utilizes models in many ways: 
-
-% models with Physics
-
-The larger benefit of a Plato model (and the also the reason for naming the project Plato, in an allusion to Plato's Cave allegory%
+Eventually, the model representation stops storing additional components when the residual information is white noise. (The project can also expand to other types of noise, e.g., pink noise.) The model components that have been collected up to that point are essentially a more faithful representation of the true underlying real world reality than the original measurements. Practically, this means a data quality advantage: The values predicted by the model are free of the unimportant noise that may have been present in the measurements. These {\em noise-reduced} models are the data quality benefit of a Plato model (and the also the reason for naming the project Plato, in an allusion to Plato's Cave allegory%
 \footnote{In Plato's Cave, a few prisoners are bound, since they were born, to look at a wall where shadows of the real world's objects appear. The prisoners perceive only the 2-dimensional world of the shadows and so they miss the deeper insights that a comprehension of the full 3-dimensional reality would offer them. Similarly, the sensor measurements that appear in a database are the mere projection of the real world. The insight in the world is captured by physical models (i.e., models that capture the world's physics). 
 }
-)
-
-\paragraph{Noise-reducted models towards query processing efficiency}
 
 
 
 
-\reminder{REMINDERS ON POINTS FOR INTRODUCTION}
 
-\paragraph{Problems of current approaches to combining databases with statistical signal processing}
-\begin{itemize}
-%
-\item Sensor data are unnecessarilly big in their raw form. Yet signal processing research has known for long that data can be split into signal and the often unimportant noise, leading to high effective lossless compression. 
-%
-\end{itemize}
+
 
