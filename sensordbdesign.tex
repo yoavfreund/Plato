@@ -1,36 +1,6 @@
-\eat{
-The analysis of sensor data has traditionally been the domain of
-signal processing or specialized areas such as image and video
-processing, audio processing, MRI, ultrasound, Seismology and the
-like. In general, most of the focus is on the real-time analysis and
-compression and reconstruction of the signals.
-
-These approaches, while very successful in specialized domain, do not
-scale well to sensor networks that contain a large number of sensors
-of diverse types that collect data over a period of years. In order to
-make it possible to access such data collections efficiently we
-propose to use abstractions and techniques from the field of
-data-bases.
-
-However, existing database systems lack a critical abstraction which
-is the {\em Physical Model}. In general, the data contained in a
-database have a one-to-one mappring to real world objects and events.
-for example a person might have an address, a name and a telephone
-number, all of which are unique entities in the world. On the other
-hand, the meaningful events in a video recoding from a webcam
-positioned over a highway are {\em not} the pixel values. The
-meaningful events might be the number of vehicles in view, the speed
-of vehicles in each lane or license plate numbers of the vehicle.
-The entities in the real world do no relate to any individual pixel or
-even group of pixels. They relate to {\em patterns} that appear across
-different pixels at different times. It is by finding these patterns
-that we can extract useful information from the video.
-}
-
-
 \section{Model Database Design Principles and Tools}
 \label{sec:design}
-A data warehouse designer uses well understood techniques to choose which added-value tables to materialize in the warehouse.%
+A data warehouse designer uses well understood techniques to choose which added-value tables to materialize in the warehouse in order to support a .%
 \footnote{Such tables are often called {\em materialized views}.}
 In a sense, Plato is also a data warehouse, where models provide added value on the measurements data, by revealing the real world reality behind the measurements. Similarly, a Plato warehouse designer will need to make a good choice of tables and models, based on appropriate criteria, whose application can be assisted by tools. 
 
@@ -42,13 +12,14 @@ The second one, which we call {\em consolidation}, is novel and enables higher c
 \label{xmpl:design-choices}
 For instance, Example~\ref{xmpl:models-and-definitions} models the sensor data by a table \texttt{sensor\_models(sensor, temp\_model)}, i.e., each sensor has a corresponding temporal model. Example~\ref{xmpl:singlemodel} models the sensor data by a single model \texttt{full\_model} that predicts the temperature based on \texttt{x}, \texttt{y} and \texttt{t}. Next, let us assume that the application often issues queries that ask for the predicted temperatures at locations other than the locations of the sensors. While it is possible for the query to compute the required predictions online from the models of  \texttt{sensor\_models(sensor, temp\_model)}, such approach would probably be very slow. The precomputation design criterion says that, given such query workload, the model administrator must choose the single model of Example~\ref{xmpl:singlemodel}.
 
-Then let us consider an alternate scenario where the application does {\em not} issue queries that ask for predicted temperatures at arbitrary locations. Rather, it cares exclusively about the temperatures at the sensor sites. In such case the precomputation criterion points towards the ``many models" design of Example~\ref{xmpl:models-and-definitions}. Yet the consolidation criterion may still dictate that it is best to choose the single model of Example~\ref{xmpl:singlemodel}. The intuition is that the temperature sensors may be correlated since physics says that temperatures are correlated in sufficiently short distances. The consolidation criterion can be formally judged by comparing the entropy of the models of the ``many models" design against the entropy of the ``single model' design. As described below.
+Then let us consider an alternate scenario where the application does {\em not} issue queries that ask for predicted temperatures at arbitrary locations. Rather, it cares exclusively about the temperatures at the sensor sites. In such case the precomputation criterion points towards the ``many models" design of Example~\ref{xmpl:models-and-definitions}. Yet the consolidation criterion may still dictate that it is best to choose the single model of Example~\ref{xmpl:singlemodel}. The intuition is that the temperature sensors may be correlated since physics says that temperatures are correlated in sufficiently short distances. The consolidation criterion can be formally judged by comparing the entropy of the models of the ``many models" design against the entropy of the ``single model' design.
 \end{example}
 
 
 \reminder{Database normalization was misrepresented. It is more nuanced than the simplification of the example. I now question the usefulness of fully drawing out in the example the parallel with normalization (it will waste lines to make the solid exposition). I can still do it in abstract text. However, I suggest that our entropy presentation follows on the ``many models" Vs "single model" pattern set by the example. Do not worry about the temperature part. We will change it to some pollutant or something sexier.
 }
 
+\eat{
 Suppose we have a relation with four attributes $A,B,C,D$. In the
 un-normalized form we store the relation in a single table with four
 columns. If there are mappings $B \to A$ and $B \to (C,D)$ then we can
@@ -95,6 +66,7 @@ used. Such a representation, if it fits the data well, can greatly
 reduce the storage and computation resources needed.
 
 \reminder{To be continuted, but give me some feedback!}
+}
 
 \eat{
 \section{Incremental update of the model}
