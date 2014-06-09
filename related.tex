@@ -1,25 +1,13 @@
 \section{Related Work}
-\reminder{to Yannis K: Please check and add to the representations I make about the prior work.}
 
 \paragraph{Works from ML and statistical signal processing communities} \reminder{for Yoav}
 
-\paragraph{MauveDB} Argued for the value of direct SQL processing. MauveDB uses models to predict values on a developer-specified grid. 
+\paragraph{Model-based data infrastructure}
+The idea of incorporating models in database systems was first presented in the context of MauveDB \cite{mauvedb-grid, mauvedb-cidr, mauvedb-vldb}. This proposal extends these ideas in several important directions: First, MauveDB argues that models need to be discretized in the coordinates' grid, before they can be queried. In this proposal we show that a fully virtual approach, where the model is perceived as a continuous function, is both easier for the data analyst and more opportune for the query optimizer. For instance, consider two models represented by their Fourier transform and a query that asks for their correlation. It is most efficient to compute this query directly on the frequency domain rather than bring it back to the time domain. Second, while MauveDB showcases some of the challenges that arise in model-based systems and presents solutions for specific models, it lacks a general API that would allow one to plug in arbitrary models (which is one of the main goals of Plato). 
+\reminder{To YP: Are we still claiming the following: Did not investigate the connections between (a) choosing models and query workload and (b) query guarantees given chosen models?}
 
-\begin{itemize}
-\item Plato argues that models need no be discretized in the coordinates' grid. A fully virtual approach, where the model is perceived as a continous function, is easier for the developer and more opportune for the optimizer. For example, consider two models represented by their Fourier transform and a query that asks for their correlation. It is most efficient to compute directly on the frequency domain rather than bringing back to time domain.
-%
-\item Did not investigate the connections between (a) choosing models and query workload and (b) query guarantees given chosen models.
-\end{itemize}
+Apart from MauveDB, several works studied particular point problems related to the use of models to represent sensor data, such as comparing existing models in terms of compression or designing indices that would be useful for such models \cite{aberer-cloud, aberer-compression}. However, neither of these works described a general extensible database platform that can accomodate and offer extensive query capabilities over a variety of models.
 
-
-\paragraph{Function Db (MIT)} 
-\begin{itemize}
-\item Showed that in the case of models captured by polynomials better compression and faster processing is achieved by working directly on polynomials.
-\end{itemize}
-
-
-\paragraph{Aberer}
-\reminder{for Yannis K: It seems he promised a lot and did a little. What do we write about this?}
-
+\paragraph{Efficient query processing on models} The idea of evaluating queries directly on the representation of a model without discretizing them first, was presented in the context of FunctionDB \cite{functiondb}. The work showed that for a broad class of polynomial functions, faster processing is achieved by evaluating queries directly on the algebraic representation of the functions. Plato's goal is to provide the platform infrastructure that enables such optimizations for additional classes of statistical models.
 
 \paragraph{Approximate query processing}
