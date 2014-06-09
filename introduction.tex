@@ -1,39 +1,36 @@
 
 \section{Introduction}
 \label{sec:introduction}
-Since the 80s, SQL database systems gradually became the foundation of Business Intelligence (BI) and On Line Analytical Processing (OLAP) applications. Their success is primarily attributed to {\em declarative querying} (via SQL), {\em automatic query optimization} and {\em physical-logical independence}, which are explained in Section~\ref{sec:healthy-aspects}. These healthy features of SQL led to increased developer and analyst productivity. They also led to specialized roles for the participants, whereas each participant needs to master only one layer of the overall architecture. 
+Since the 80s, SQL database systems gradually became the foundation of Business Intelligence (BI) and On Line Analytical Processing (OLAP) applications. Their success is primarily attributed to {\em declarative querying} (via SQL), {\em automatic query optimization} and {\em physical-logical independence}, which are explained in Section~\ref{sec:healthy-aspects}. These healthy features of SQL led to increased developer and analyst productivity. They also led to specialized roles for the participants, whereas each participant (database developer, database administrator) needs to master only one layer of the overall architecture. 
 
 However, SQL systems fail in the space of predictive analytics that involve sensors generating measurements in the space and time dimensions.%
 \footnote{Indeed, one may argue that some of the discussed failures and respective remedies proposed by Plato, also apply to predictive analytics of non-sensor, non-spatiotemporal data. Nevertheless, the focus of this project is exclusively on spatiotemporal sensor data.
 }
-Section~\ref{sec:the-failure} argues that at the core of the failure of SQL databases in the management and analytics of sensor spatiotemporal data is the lack of a critical abstraction, which is the {\em real world model}.%
+Section~\ref{sec:the-failure} argues that at the core of the failure of SQL databases in the management and analytics of sensor spatiotemporal data is the lack of a critical abstraction, which is the {\em real world model}, which captures a stochastic process that generates the measurements.%
 \footnote{The real world model is frequently called the ``physical model" as it corresponds to the physics of the real world. This proposal uses the term ``real world model" (instead of the term ``physical model") to avoid the confusion caused by the two different meanings of the word ``physical" in the sensors' signal processing and the database community.
 }
+
 The signal processing area has deeply built in its foundations the real world model concept, which leads to great results in the cleaning, compression and reconstruction of signals. However, this area's approaches have been directly applicable only to problems with (a) low diversity of data (e.g., when the entire data set of interest comes from a single type of sensor and there are no ``metadata" and/or other alphanumeric data to provide context to the sensor data analysis and its results), (b) low volume of data, with no complex needs on how to effectively persist the data set over time and (c) a single type of ``hardwired" analysis. 
 % Furthermore they require highly knowledgeable signal processing experts, who must combine statistics.
 It is apparent that databases and signal processing techniques should be coupled but, unfortunately, currently they do not mix well. The result is reduced productivity, very high requirements on the analysts (must be simoultaneously experts in signal processing, statistics and big data management) and projects that cannot easily incorporate many types of data and many types of analysis.
+
+\reminder{to Yannis P: fix the roadmap}
 
 Section~\ref{sec:plato} introduces the proposed Plato database system, which brings the real world model concept into SQL databases, therefore combining the healthy productivity aspects of SQL systems (declarative queries, multiple levels of abstraction, automated optimization) with the sensor data processing benefits of signal processing techniques.
 
 Section~\ref{sec:noise-reducted} argues that the noise-reducted, additive models that can be derived from common learning algorithms (in the field of signal processing) confer both a data quality benefit and a huge efficiency benefit, by virtue of providing very compressed representations of the model. Query processing algorithms can run directly on these compressed representations.
 
 % Incremental maintenance
-Section~\ref{sec:}
+%Section~\ref{sec:} ....
 
 
 \subsection{The healthy aspects of SQL databases in analytics}
 \label{sec:healthy-aspects}
-In a typical database-driven application architecture (see Figure~\ref{fig:db-driven-arch}), the business intelligence application issues an SQL query over tables. As far as the application is concerned, the tables are {\em logical} in the sense that they are just mathematical relations. In contrast, the underlying data structures where the tables are stored, as well as the indices on the tables, constitute the {\em physical} layer, whose knowledge is not needed for writing queries. The queries are declarative in the sense that they only describe the desired result without describing the algorithm that computes the result. A query optimizer automatically finds a good plan (in effect, algorithm) for executing the query, taking into consideration the specifics of the physical layer. Declarativeness and automatic optimization increase {\em developer productivity} and {\em lower the sophistication bar} needed for writing analytics. Furthermore, they are a key enabler behind visual OLAP systems, where the (non-programming) user can easily aggregate, correlate, drill-down in the data, pivot, etc. Such systems (e.g., Cognos, Microstrategy) faced the relatively easy task of translating clicks into declarative queries, while the problem of optimizing these queries was left to the database.
-
-\reminder{to Yannis P: The full truth is that also provided solutions to the problem of adding materialized views, which is actually connected to the problem of materializing models.
-Further levels of abstraction are achieved with {\em views}, which are tables that capture the result of filtering, combining and aggregating the data of the logical tables in a way that simplifies the queries issued by the applications.
-}
+In a typical database-driven application architecture (see Figure~\ref{fig:db-driven-arch}), the business intelligence application issues an SQL query over tables. As far as the application is concerned, the tables are {\em logical} in the sense that they are just mathematical relations. In contrast, the underlying data structures where the tables are stored, as well as the indices on the tables, constitute the {\em physical} layer, whose knowledge is not needed for writing queries. The queries are declarative in the sense that they only describe the desired result without describing the algorithm that computes the result. A query optimizer automatically finds a good plan (in effect, algorithm) for executing the query, taking into consideration the specifics of the physical layer. Declarativeness and automatic optimization increase {\em developer productivity} and {\em lower the sophistication bar} needed for writing analytics. Furthermore, they are a key enabler behind visual OLAP systems, where the (non-programming) user can easily aggregate, correlate, drill-down in the data, pivot, etc. During runtime, such systems (e.g., Cognos, Microstrategy) face the relatively easy task of translating clicks into declarative queries, while the problem of optimizing these queries is left to the database.
 
 A database administrator may ``tune" the physical layer from time to time in order to boost the performance of the observed workload. However, logical/physical separation says that such tuning changes at the physical layer do not require rewriting of the logical layer. Rather, the query processing speed automatically benefits. Notice how logical/physical separation divides the expertise and tasks needed for the maintenance of the overall system, therefore making its maintenance and evolution very easy and inexpensive.
 
-% the decoupling has led to nicely separated tools. We will see that such a clean architectural separation has collapsed.
-% parallel
-% logical-physical separation is pushed even further by auto-administrated systems \cite{}.
+Further levels of abstraction are achieved with {\em views}, which are tables that capture the result of filtering, combining and aggregating the data of the logical tables in a way that simplifies the queries issued by the applications. A database administrator may elect to materialize some views, in order to precompute some of the computations that the live queries must perform. Again, notice that when the database administrator changes a view from virtual to materialized, the developer need not change her queries.
 
 \begin{figure}
 {\bf the conventional database-driven analytics architecture illustrating declarative query and optimizer that automatically finds how to utilize the data structures best.}
@@ -45,31 +42,35 @@ A database administrator may ``tune" the physical layer from time to time in ord
 \label{sec:the-failure}
 In conventional SQL databases, the data contained in the database have a one-to-one mapping to the captured real world objects and events. For example, a database may represent persons, which have an address, a name and a telephone number. Each represented person is supposed to be a corresponding unique entity in the world. Vice versa, as far as the database and the applications running on it are concerned, the represented entities, attributes and relationships constitute the entire real world of interest. In contrast to a conventional database, the sensor data are mere {\em measurements} (samples) of the reality. The full reality of interest to the analytics application is captured by models that predict the quantity of interest at each point in a range of time and/or space. In practice, the gap between the measurements and the real world models is best crossed by learning algorithms that discover the parameters of the real world model and are tuned to the type of the model. For example, when one models a temporal signal exhibiting periodicity, she will use the Fourier transform to discover the frequencies. Given the frequencies, the model can predict a value for any time.
 
-In the absence of real world models in database systems, sensor analytics applications either do not use databases or they use them simply as a ``dumb" storage of measurements.
-Given an analytics request, one has to first issue queries that retrieve the relevant measurements. Then she deploys signal processing learning algorithms on them to compute the model's parameters. Finally,  the (typically statistical) analysis is often performed over the model and its results are moved into the database. 
-The healthy aspects of SQL database systems discussed in Section~\ref{sec:healthy-aspects} are no longer observed. Instead, the above process is characterized by low productivity as data move  in an out of the database. Furthermore, unlike the ecosystem of conventional SQL systems, the analysts of sensor data must be experts of many areas: signal processing, statistics, databases and often big data management and processing. As sensor data proliferate, the short supply of such multiarea experts and the low productivity in developing and maintaining sensor analytics will lead to a world where a lot of sensor data will be collected but only limited analysis will be performed at them, at the cost of missing the insights that these data can offer.
+A second cornerstone of statistical sensor data processing, also missed by SQL systems, is the assumption that the real world process that leads to the measurements is a stochastic process. Respectively, an issued query may not return a single predicted value for a quantity; rather, it should return a probability distribution for the predicted value, often simplified by providing an expected value and a confidence interval.
 
-% One stupid approach: Work directly with the measurements
+In the absence of real world models in database systems, various suboptimal approaches are used. An approach is to use a database simply as a ``dumb" storage of measurements. Then
+given an analytics request, one has to first issue queries that retrieve the relevant measurements. Then she deploys signal processing learning algorithms on them to compute the model's parameters. Finally,  the results are moved into the database. In a variation to this approach, one may not use a SQL database at all (since SQL does not buy her significant functionality anyway) and instead rely on file systems (including the highly scalable distributed file systems). 
 
-% Currently there is a split between database systems and signal processing. When the two are combined, the combination is based on low productivity, ad-hoc practices. Such practices do not scale in scenarios where many diverse types of data must be quickly analyzed. 
+In either case, the healthy aspects of SQL database systems discussed in Section~\ref{sec:healthy-aspects} are no longer observed. Instead, the above process is characterized by low productivity as data move in an out of the database in hardwired ways. The approach does not scale to cases with high diversity of data (e.g., when there are ``metadata" and/or other alphanumeric data that provide context to the sensor data analysis and its results) and the analytics application may issue multiple types of  requests. Furthermore, unlike the ecosystem of conventional SQL systems, the analysts of sensor data must be experts of many areas: signal processing, statistics, databases and often big data management and processing. As sensor data proliferate, the short supply of such multiarea experts and the low productivity in developing and maintaining sensor analytics will lead to a world where a lot of sensor data will be collected but only limited analysis will be performed at them, at the cost of missing the insights that these data can offer.
 
-In recent years databases have been extended (typically via UDFs) with machine learning procedures that can allow one to execute such procedures without moving data in-and-out of the database. While such extensions are useful, we argue next that they miss the optimization opportunities that become available once models appear in the database as first class citizens and the query language and query processing are adjusted accordingly.
+% In a second approach, one may trivialize . For example, This approach can suffer from quality issues and/or performance issues. First, unless the set of measurements is very dense there is a risk that the interpolated values 
 
-The net effect is that analytics on spatiotemporal sensor data currently require the involvement of developers who are essentially skilled in all of the (a) data filtering and combining, (b) modeling, and (c) low level data representation and related algorithms. 
+In recent years databases have been extended (typically via UDFs) with machine learning procedures that can allow one to execute such procedures without moving data in-and-out of the database. While such extensions are useful, we argue next that they miss the optimization opportunities that become available once models appear in the database as first class citizens and the query language and query processing are adjusted accordingly. Furthermore, they do not account yet for the probabilistic nature of the data and the statistical nature of the queries.
+
+Recent research systems have expanded SQL databases to probabilistic facts (as opposed to the conventional merely boolean facts). As we discuss next, the proposed system assumes that the models are also associated with probabilities.
+
+%The net effect is that analytics on spatiotemporal sensor data currently require the involvement of developers who are essentially skilled in all of the (a) data filtering and combining, (b) modeling, and (c) low level data representation and related algorithms. 
 % the decoupling shown earlier has collapsed.
 
 \subsection{Plato: Models as a first class citizen of the database and query language}
 \label{sec:plato}
-The proposed Plato database has models as a ``first class citizen" abstract type of the database. At a first cut, a Plato model is a continous function over time and/or space that predicts a quantity of interest (eg, temperature, velocity, acceleration, air pollutants density etc) at any coordinate in a certain time/space area. Alternately, a database-minded person may perceive a Plato model as a table whose attributes are time and/or space coordinates and one or more types of quantities. The table has infinitely many tuples and the time/space coordinates form a key, i.e.,  given values for the time/space coordinates, each quantity has a unique associated value. 
+The proposed Plato database has models as a ``first class citizen" abstract type of the database. If we neglect the stochastic aspect of the data, a Plato model is a continous function over time and/or space that predicts a quantity of interest (eg, temperature, velocity, acceleration, air pollutants density etc) at any coordinate in a certain time/space area. Alternately, a database-minded person may perceive a Plato model as a table whose attributes are time and/or space coordinates and one or more types of quantities. The table has infinitely many tuples and the time/space coordinates form a key, i.e.,  given values for the time/space coordinates, each quantity has a unique associated value. 
+In order to capture the stochastic aspect of a process, Plato assumes that the process may be described by multiple functions and each function is assigned a probability.
 
 % Queries that one can write.
 % Challenge: develop the query languages
 
-Consequently, Plato expands the applicability of the successful architecture of Figure~\ref{fig:db-driven-arch} into spatiotemporal sensor data management and analytics. The application issues declarative ``Plato SQL" queries, which utilize the models without being concerned about the specifics of how the models are actually represented in the storage nor the intricacies of how to most efficiently execute the queries. The following sections provide multiple examples of Plato SQL queries. In one example, a query predicts quantities at specific coordinates. In another example, models are correlated. In a third example, queries drill into specific time segments of the models; e,g., the afternoon times. In yet another example, models capturing the daily paths of individual persons are composed with models that provide the distribution of atmospheric polutants in San Diego County and the result is models of the polutant levels that these persons breathed; the query that composes the models is essentially just a simple SQL join. These model-related queries are seamlessly combined with the rest of the database, therefore making it easy to draw results about various segments of the entities represented in the database. For example, a single query can test an hypothesis regarding the inhalation of an atmospheric polutant by individuals and the asthma attack incidents (as recorded in the conventional medical record) of those indviduals.
+Consequently, Plato expands the applicability of the successful architecture of Figure~\ref{fig:db-driven-arch} into statistical, spatiotemporal sensor data management and analytics. The application issues declarative ``Plato SQL" queries, which utilize the models without being concerned about the specifics of how the models are actually represented in the storage nor the intricacies of how to most efficiently execute the queries. The following sections provide multiple examples of Plato SQL queries. In one example, a query predicts quantities at specific coordinates. In another example, models are correlated. In a third example, queries drill into specific time segments of the models; e,g., the afternoon times. In yet another example, models capturing the daily paths of individual persons are composed with models that provide the distribution of atmospheric polutants in San Diego County and the result is models of the polutant levels that these persons breathed; the query that composes the models is essentially just a simple SQL join. These model-related queries are seamlessly combined with the rest of the database, therefore making it easy to draw results about various segments of the entities represented in the database. For example, a single query can test an hypothesis regarding the inhalation of an atmospheric polutant by individuals and the asthma attack incidents (as recorded in the conventional medical record) of those indviduals.
 
 \reminder{the next is rough}
 
-\paragraph{Noise-reducted, additive model representations towards data quality}
+\subsection{Noise-reducted, additive model representations towards data quality}
 Obviously, the {\em storage-level representation} (from now on called simply representation) of the models cannot be the infinetly many possible coordinates and their associated quantities. Rather, vast prior work in signal processing research teaches 
 
 The effectiveness of such representations is connected to the physics of the signals. For example, the frequency domain representations generated by Fourier transforms capture the periodicity of certain signals. In another example, ARMA models capture the differential equations that govern the connection between neighbor points in time and space.
@@ -88,36 +89,10 @@ The larger benefit of a Plato model (and the also the reason for naming the proj
 
 
 
-\reminder{REMINDERS ON POINTS FOR INTRODUCTION}
 
-\paragraph{Problems of current approaches to combining databases with statistical signal processing}
-\begin{itemize}
-%
-\item Sensor data are unnecessarilly big in their raw form. Yet signal processing research has known for long that data can be split into signal and the often unimportant noise, leading to high effective lossless compression. 
-%
-\end{itemize}
+\subsection{Use cases}
+\reminder{}
 
-\paragraph{The benefits of a model-aware database}
-
-\begin{itemize}
-%
-\item Well-developed theory and set of models and model generators that effectively capture many real world cases.
-%
-\end{itemize}
-
-\paragraph{Research Challenges}
-\begin{itemize}
-%
-\item Specify declarative query languages that process models.
-%
-\item The database algorithms can work efficiently directly on the models. Specify a logically/physically-separated architecture where an optimizer is aware of the specifics of the model representation and chooses query processing algorithms accordingly.  For example, consider two models represented by their Fourier transform and a query that asks for their correlation. It is most efficient to compute directly on the frequency domain rather than bringing back to time domain.
-%
-\item Signal processing community provides a wide variety of model generators, with various guarantees on the loss information. Plato must semiautomate the choice of the appropriate model generator. This requires a classification of model generators with respect to their loss of information properties. More importantly, different queries may pose different needs of accuracy and of what constitues information loss. The semiautomation must take into account query workload. The query answering must utilize the best model for the problem. Granularity of queries can also play a role: Can you avoid computing the entire model and instead compute on the fly only the parts of the model that are of interest to the query? Which models are best fo such?
-%
-\item How do you incrementally maintain the model as the data change? Tradeoff between speed of convergence and computational resources used. Again, query workload must specify.
-\end{itemize}
-
-\paragraph{Use cases}
 
 \subsection{Prior work on model-aware databases}
 \reminder{to Yannis K: Please check and add to the representations I make about the prior work.}
@@ -145,10 +120,12 @@ The larger benefit of a Plato model (and the also the reason for naming the proj
 
 \paragraph{Approximate query processing}
 
-\section{Broad Impact}
-\label{sec:broad-impact}
+\reminder{REMINDERS ON POINTS FOR INTRODUCTION}
 
-
-\section{Intellectual Merit}
-\label{sec:intellectual-merit}
+\paragraph{Problems of current approaches to combining databases with statistical signal processing}
+\begin{itemize}
+%
+\item Sensor data are unnecessarilly big in their raw form. Yet signal processing research has known for long that data can be split into signal and the often unimportant noise, leading to high effective lossless compression. 
+%
+\end{itemize}
 
