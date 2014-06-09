@@ -3,7 +3,7 @@
 
 \section{Inferring Models and Representing them Compactly}
 \label{sec:compression}
-The practice of data compression~\cite{Sayood12} shows that most
+The practice of data compression~\cite{DBLP:books/mk/Sayood12} shows that most
 real-world sensor generated sequences can be captured reasonably
 well using one of a small set of statistical models such as ARMA
 models, Fourier and wavelet-based models and Singular Value
@@ -51,7 +51,7 @@ Lossless compression does not distinguish between the two.
 
 \subsection{Lossy compression}
 In order to reach higher compression ratios than lossless
-compression, it is common to use {\em lossy compression}~\cite{CompressionBook}.
+compression, it is common to use {\em lossy compression}.
 
 Lossy compression is based on the assumption that the data to be
 compressed is a point in Euclidean space. From this point onward we
@@ -196,7 +196,7 @@ whether or not the data source is stationary.
 
 When the data source is stationary, efficient model maintenance is
 closely related to the subjects of sufficient statistics and or data
-synopses or sketches~\cite{}. In any of these formulation the goal is
+synopses or sketches~\cite{DBS-004}. In any of these formulation the goal is
 to define a small data structure that stores the information necessary
 to define the model. We plan to test the methods proposed in the
 literature and, where necessary, develop new ones.
@@ -208,7 +208,7 @@ ignore data from the distant past. At the same time, ignoring data
 from the distant past limit the accuracy at which the model parameters
 can be estimated. Calibrating the algorithm to consider the optimal
 window into the past has been extensively studied in online learning
-theory~\cite{Cesa-Bianchi}, in particular
+theory~\cite{prediction_learning_models}, in particular
 in~\cite{HerbsterWa98,bousquet01tracking,FreundScSiWa97} there is a
 detailed study of algorithms for combining models that change over
 time. Plato will use these online learning methods for efficient mode
