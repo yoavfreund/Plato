@@ -27,6 +27,8 @@ There are multiple models and respective compressions that are applicable, as ex
 
 
 \subsection{Lossless compression}
+\label{sec:lossless}
+
 A lossless compression method is one which can reconstruct the
 original measurements without error. Popular lossless compression
 methodss are {\tt gzip} and {\tt compress}. A lossless compression
@@ -116,6 +118,8 @@ a reasonable approximation and then improving that approximation to
 the desired level. 
 
 \subsection{Reduced-noise models}
+\label{sec:reduced-noise}
+
 Lossy models invariably loose some of the original
 data. However, even with a lossy model it is often the case that the result is a
 reconstruction that is {\em closer} to the true underlying real-world
@@ -182,7 +186,8 @@ smoothing is based solely on the statistical model that was inferred from the da
 
 
 
-\subsubsection{Model Maintenance}
+\subsection{Model Maintenance}
+\label{sec:ivm}
 
 When considering a database system that processes data streams over
 long periods of time it is necessary to consider how to maintain the
