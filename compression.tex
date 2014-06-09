@@ -1,31 +1,43 @@
 % Model accuracy definition in modelbaseddbs
 % encoder - decoder
 
-\section{Opportunities in Data Compression}
+\section{Inferring Models and Representing them Compactly}
 \label{sec:compression}
-
+The practice of data compression~\cite{Sayood12} shows that most
+real-world sensor generated sequences can be captured reasonably
+well using one of a small set of statistical models such as ARMA
+models, Fourier and wavelet-based models and Singular Value
+Decomposition models (SVD or PCA). 
 Data compression and statistical models are closely related
-concept. Good statistical models allow Plato to achieve high
-compression rates. On the other hand, high compression rates indicate
-that plato has correctly identified significant statistical patterns
-in the data, and those patterns are potentially useful for the
-analyst.
+concepts. Good statistical models allow Plato to achieve high
+compression rates. Vice versa, high compression rates indicate
+that Plato has correctly identified significant statistical patterns
+in the data and has got rid of the noise. The following discussion
+explains how the model administrator chooses the appropriate models
+and makes the case for providing additive, noise-reducted models.
 
-We now elaborate on this interdependence of models and compression and
-on the way they are used in Plato.
+\reminder{to YF and YK: The term codecs makes below its first appearance.}
+The key responsibility of the model administrator (see Figure~\ref{fig:db-driven-arch}) is to choose a set of viable models, which we refer to as {\em codecs}. Plato will then use
+machine learning algorithms to tune the parameters of the different
+codecs so that they best fit the data. The administrator will then compare the
+performance of the different codecs in terms of compression and
+distortion and choose the model that performs best.
+
+There are multiple models and respective compressions that are applicable, as explained next. In the interest of comparisons to prior work, we initiate the discussion with a presentation of lossless compression and then continue with models involving lossy compression. In practice, Plato will use additive and noise-reducted models only. The underlying logic is that we aim for minimum query processing time and high quality models, while storage is a secondary only consideration.
+
 
 \subsection{Lossless compression}
 A lossless compression method is one which can reconstruct the
 original measurements without error. Popular lossless compression
-methods are {\tt gzip} and {\tt compress}. A lossless compression
+methodss are {\tt gzip} and {\tt compress}. A lossless compression
 method corresponds to a statistical model over the data and the
 expected compression ratio is determined by the distance between
-statistical model and the empirical distribution of the data (as
-measured by the the Kullback-Leibler-divergence). 
+the statistical model and the empirical distribution of the data (as
+measured by the the Kullback-Leibler divergence). 
 
 Unfortunately, lossless compression methods usually achieve a
-compression ratio of around of around 2 to 4. Which corresponds to the
-fact that it accurately captures both the true state of the world (the signal)
+compression ratio of around 2 to 4. This corresponds to the
+fact that lossless compression accurately captures both the true state of the world (the signal)
 and the many random influences on the measurements (the noise). 
 Lossless compression does not distinguish between the two.
 
@@ -37,17 +49,20 @@ Lossless compression does not distinguish between the two.
 
 \subsection{Lossy compression}
 In order to reach higher compression ratios than lossless
-compression. It is common to use {\em Lossy compression}~\cite{CompressionBook}.
+compression, it is common to use {\em lossy compression}~\cite{CompressionBook}.
 
 Lossy compression is based on the assumption that the data to be
 compressed is a point in Euclidean space. From this point onward we
-assume that the measurements arriving from a (single) sensor is
-represented as a sequence of real values: $\vx=(x_1,x_2,\ldots,x_t)$.
+assume that the measurements arriving from a (single) sensor are
+represented as a sequence of real values $\vx=(x_1,x_2,\ldots,x_t)$.
 We denote the reconstruction of the sequence from the compressed
 version by $\vhx=(\hx_1,\hx_2,\ldots,\hx_t)$. As we are using lossy
 compression $\vhx$ is not equal to $\vx$. The difference between the
 two sequences is called the {\em residual} which we denote by $\vr =
-\vx -\vhx$.  We require that the residual is small. The measure of
+\vx -\vhx$.  We require that the residual is small. 
+\reminder{to YF: Just small? We really require that it is noise.
+}
+The measure of
 the size of the residual is called the {\em distortion}. We use two of
 the most popular distortion measures.
 \begin{itemize}
@@ -57,7 +72,7 @@ the most popular distortion measures.
 \mbox{RMS}\left(\vhx,\vx \right)
 \doteq \sqrt{\frac{\sum_{i=1}^t r_i^2}{t}}
 \]
-\item If the errors are usually small and only rarly very large,
+\item If the errors are usually small and only rarely very large,
 the RMS is misleadingly large. A better error measure in such
 situations is the fraction of times the error is larger
 than some threshold:
@@ -66,22 +81,25 @@ than some threshold:
 \doteq \frac{\sum_{i=1}^t \mathbf{1}\left(|r_i|>\epsilon \right)}{t}
 \]
 \end{itemize}
+\reminder{to YF: Instead of audio and image examples, please provide a signal processing case where wavelets/FFT, SVD, ARMA provide good compression. I made a mention to Matt's efforts.
+}
 Lossy compression methods such as {\tt jpeg2000} for images and {\tt
   mp3} for audio can achieve compression ratios of 100 or more
-with no perceptible degredation in quality.
+with no perceptible degradation in quality.
 
-\section{Additive models}
-Some of the most commonly used models used for lossy compression are
+\subsection{Additive models}
+\label{sec:additive}
+Some of the most commonly used models for lossy compression are
 additive with respect to the RMS distortion measure. This set of
 models includes FFT, Wavelets, and SVD. What we mean here by
 additivity is that any model is a sum of components: $\vhx =
-\sum_{i=1}^k \vc_i$;m that the best model for $k_2>k_1$ shares the
+\sum_{i=1}^k \vc_i$; that the best model for $k_2>k_1$ shares the
 first $k_1$ components with the best model using $k_1$ components; and
 that the reduction in the distortion is largest for the first component
-and decreases monotonically A $k$ increases.
+and decreases monotonically as $k$ increases.
 
 Additive models lend themselves to an incremental compression
-scheme. Starting by setting the residual to be to original
+scheme. Starting by setting the residual to the original
 measurements $\vr_0 \leftarrow \vx$, repeat the following steps for
 $i=1,2,\ldots$
 \begin{itemize}
@@ -95,52 +113,25 @@ have a lossless compression of the original sequence. However, this
 sequence is organized in such a way that one can build the
 reconstruction of the original sequence incrementally, quickly getting
 a reasonable approximation and then improving that approximation to
-the desired level. (YK, is that what you were looking for?)
+the desired level. 
 
-\section{Model Selection}
-\label{sec:Model Selection}
-The practice of data compression~\cite{Sayood12}, shows that most
-real-world sensor generated sequences can be compressed reasonably
-well using one of a small set of statistical models such as ARMA
-models, Fourier and wavelet-based models and Singular Value
-Decomposition models (SVD or PCA). 
-
-The key responsibility of the data administrator is to choose a set of
-viable models, which we refer to as {\em Codecs}. Plato will then use
-machine learning algorithms to tune the parameters of the different
-Codecs so that they best fit the data. It will then compare the
-performance of the different codecs in terms of compression and
-distortion and choose the model that performs best.
-
-When the data to be compressed arrives from a large number of
-proximate sensors, there are potentially large benefits from
-compressing them together using a predictive statistical model such as
-ARMA. The space of models that capture all possible dependencies
-between the sensor readings is extremely large and hard to learn. The
-role of the data administrator in this context is to restrict the set
-of possible interactions to make the learning problem easier. In the
-example of modeling the temperatures of rooms in a building the model
-might be restricted to considering the dependence between the outside
-temperature and that of the rooms and in addition, the dependence
-between neighboring rooms. A model that identifies the stronger
-dependencies within these restrictions is useful both for data
-compression, as a model of the physical reality (which rooms are
-better insulated than others) and as a basis for noise reduction.
-
-\subsection{Noise reduction}
-Lossy compression methods invariably loose some of the original
-data. However, it is often the case that the result is a
+\subsection{Noise-reducted models}
+Lossy models invariably loose some of the original
+data. However, even with a lossy model it is often the case that the result is a
 reconstruction that is {\em closer} to the true underlying real-world
-values than the original measurements. How is that possible?
+values than the original measurements. 
+Noise reduction gives rise to a different way of measuring
+the quality of a compression scheme. Instead of considering the {\em
+amplitude} of the residual using RMS or $\mbox{err}_{\epsilon}$ we
+can consider whether or not the residual is white noise. If the models
+that we consider are linear we can measure how similar the residual is
+to white noise by considering the auto-correlation function for each
+residual and the cross-correlation between each pair of residuals. We
+expect the auto-correlation to consist of a single delta-function at
+zero and we expect the cross-correlation functions to be close to zero
+everywhere.
 
-The answer was hinted at in the previous section. Noise reduction is
-possible when a good model of the dependencies between different
-sensors is available. In such situations the compression and
-decompression of the data shifts the data from the measured vector
-towards the manifolds that is consistent with the physical and
-statistical properties of the data. The result is similar to that of
-{\em smoothing} the data, with the important difference that the
-smoothing is based on the statistical model that was inferred from the data.
+The following section opens a second path towards noise reduction
 
 \iffalse
 This is possible when the model used for compression captures some
@@ -157,16 +148,39 @@ variations in the measured temperature is likely to be an artifact of
 the sensor rather than anything real.
 \fi
 
-The goal of noise reduction gives rise to a different way of measuring
-the quality of a compression scheme. Instead of considering the {\em
-  amplitude} of the residual using RMS or $\mbox{err}_{\epsilon}$ we
-can consider whether or not the residual is white noise. If the models
-that we consider are linear we can measure how similar the residual is
-to white noise by considering the auto-correlation function for each
-residual and the cross-correlation between each pair of residuals. We
-expect the auto-correlation to consist of a single delta-function at
-zero and we expect the cross-correlation functions to be close to zero
-everywhere.
+
+
+\subsection{Better models and higher compression by dependencies}
+\label{sec:dependencies}
+
+When the data to be compressed arrives from a large number of
+proximate sensors, there are potentially large benefits from
+compressing them together using a predictive statistical model such as
+ARMA. Unfortunately, the space of models that capture all possible dependencies
+between the sensor readings is extremely large and hard to learn fully automatically.
+In this case, Plato will engage the model administrator in a semiautomatic procedure.
+
+The role of the model administrator in this context is to restrict the set
+of possible interactions to make the compression most effective,
+while keeping the associated the learning problem reasonable easy. In the
+example of modeling the temperatures of rooms in a building the model
+might be restricted to considering the dependence between the outside
+temperature and that of the rooms and in addition, the dependence
+between neighboring rooms. A model that identifies the stronger
+dependencies within these restrictions is useful both for data
+compression, as a model of the physical reality (which rooms are
+better insulated than others) and as a basis for noise reduction.
+
+Notice that noise reduction is
+possible when a good model of the dependencies between different
+sensors is available. In such situations the compression and
+decompression of the data shifts the data from the measured vector
+towards the manifold that is consistent with the physical and
+statistical properties of the data. The result is similar to that of
+{\em smoothing} the data, with the important difference that the
+smoothing is based solely on the statistical model that was inferred from the data.
+
+
 
 \subsubsection{Model Maintenance}
 
@@ -216,7 +230,3 @@ In the simplest setting, the assistant is given
 %
 \end{enumerate}
 }
-
-\subsection{Adjusting to filtering needs}
-
-\reminder{To Yannis K: Add discussion explaining which models are good for pushing selections down}

@@ -88,31 +88,6 @@ The larger benefit of a Plato model (and the also the reason for naming the proj
 
 
 
-\subsection{Prior work on model-aware databases}
-\reminder{to Yannis K: Please check and add to the representations I make about the prior work.}
-
-\paragraph{Works from ML and statistical signal processing communities} \reminder{for Yoav}
-
-\paragraph{MauveDB} Argued for the value of direct SQL processing. MauveDB uses models to predict values on a developer-specified grid. 
-
-\begin{itemize}
-\item Plato argues that models need no be discretized in the coordinates' grid. A fully virtual approach, where the model is perceived as a continous function, is easier for the developer and more opportune for the optimizer. For example, consider two models represented by their Fourier transform and a query that asks for their correlation. It is most efficient to compute directly on the frequency domain rather than bringing back to time domain.
-%
-\item Did not investigate the connections between (a) choosing models and query workload and (b) query guarantees given chosen models.
-\end{itemize}
-
-
-\paragraph{Function Db (MIT)} 
-\begin{itemize}
-\item Showed that in the case of models captured by polynomials better compression and faster processing is achieved by working directly on polynomials.
-\end{itemize}
-
-
-\paragraph{Aberer}
-\reminder{for Yannis K: It seems he promised a lot and did a little. What do we write about this?}
-
-
-\paragraph{Approximate query processing}
 
 \reminder{REMINDERS ON POINTS FOR INTRODUCTION}
 
