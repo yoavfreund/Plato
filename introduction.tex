@@ -26,6 +26,7 @@ Section~\ref{sec:noise-reducted} argues that the reduced-noise, additive models 
 
 \subsection{The healthy aspects of SQL databases in analytics}
 \label{sec:healthy-aspects}
+
 In a typical database-driven application architecture (see Figure~\ref{fig:db-driven-arch}), the business intelligence application issues an SQL query over tables. As far as the application is concerned, the tables are {\em logical} in the sense that they are just mathematical relations. In contrast, the underlying data structures where the tables are stored, as well as the indices on the tables, constitute the {\em physical} layer, whose knowledge is not needed for writing queries. The queries are declarative in the sense that they only describe the desired result without describing the algorithm that computes the result. A query optimizer automatically finds a good plan (in effect, algorithm) for executing the query, taking into consideration the specifics of the physical layer. Declarativeness and automatic optimization increase {\em developer productivity} and {\em lower the sophistication bar} needed for writing analytics. Furthermore, they are a key enabler behind visual OLAP systems, where the (non-programming) user can easily aggregate, correlate, drill-down in the data, pivot, etc. During runtime, such systems (e.g., Cognos, Microstrategy) face the relatively easy task of translating clicks into declarative queries, while the problem of optimizing these queries is left to the database.
 
 A database administrator may ``tune" the physical layer from time to time in order to boost the performance of the observed workload. However, logical/physical separation says that such tuning changes at the physical layer do not require rewriting of the logical layer. Rather, the query processing speed automatically benefits. Notice how logical/physical separation divides the expertise and tasks needed for the maintenance of the overall system, therefore making its maintenance and evolution very easy and inexpensive.
@@ -33,9 +34,11 @@ A database administrator may ``tune" the physical layer from time to time in ord
 Further levels of abstraction are achieved with {\em views}, which are tables that capture the result of filtering, combining and aggregating the data of the logical tables in a way that simplifies the queries issued by the applications. A database administrator may elect to materialize some views, in order to precompute some of the computations that the live queries must perform. Again, notice that when the database administrator changes a view from virtual to materialized, the developer need not change her queries.
 
 \begin{figure}
-{\bf the conventional database-driven analytics architecture illustrating declarative query and optimizer that automatically finds how to utilize the data structures best.}
+\center
+\includegraphics[width=8cm]{fig-dbms.pdf}
 \caption{Database-driven analytics architecture}
 \label{fig:db-driven-arch}
+\vspace*{-0.5cm}
 \end{figure}
 
 \subsection{The failure of SQL databases in spatiotemporal sensor data analytics}
