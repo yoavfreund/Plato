@@ -7,14 +7,12 @@
 
 \reminder{To Yannis P: I changed $\mathcal{\bar{D}}$ to $\mathcal{D}$, due to the reasons we discussed. Similarly for $\mathcal{\bar{Q}}$.}
 
-The proposed Plato database aims to solve the discussed problems by introducing models as first class citizens. In this section we formally define models and discuss the criteria that can be used to compare two models.
-
-A model is a mathematical representation of the world that predicts a quantity of interest (e.g., temperature) at every point of the spatiotemporal domain.
-In the basic case, a {\em model} is a continuous function $f:\mathcal{D}\mapsto \mathcal{Q}$ from a (generally multidimensional) spatiotemporal domain $\mathcal{D}$ to $\mathcal{Q}$. In this work we consider function domains $\mathcal{D}$ that are subspaces of four-dimensional spatiotemporal domain (that includes the three space dimensions and the temporal dimension). For instance, it can be a sphere of $(x, y, t)$ points around a center $(x_0, y_0, t_0)$, a square of $(x, y)$ points, etc.
+The proposed Plato database aims to solve the discussed problems by introducing models as first class citizens. A model is a mathematical representation of the world that predicts a quantity of interest (e.g., temperature) at every point of the spatiotemporal domain.
+In the basic case, a {\em model} is a continuous function $f:\mathcal{D}\mapsto \mathcal{Q}$ from a (generally multidimensional) spatiotemporal domain $\mathcal{D}$ to $\mathcal{Q}$. In this work we consider domains $\mathcal{D}$ that are subspaces of the four-dimensional spatiotemporal domain (that includes the three space dimensions X, Y, Z and the temporal dimension T). For instance, the domain of a model can be a sphere of $(x, y, t)$ points around a center $(x_0, y_0, t_0)$, a square of $(x, y)$ points, etc.
 
 \vspace*{0.5cm}
 \begin{example}
-For instance, a model for temperature can be a function $f:D_{t\_2012\_now}\mapsto Q_{float}$, which given a point in time $t$ between 2012 and now returns a float, corresponding to the \emph{predicted} temperature at time $t$.
+For instance, a model for temperature may be a function $f:D_{t\_2012\_now}\mapsto Q_{float}$, which given a point in time $t$ between 2012 and now returns a float, corresponding to the \emph{predicted} temperature at time $t$.
 \end{example}
 \vspace*{0.5cm}
 
@@ -27,16 +25,16 @@ Raw sensor data measurements are stored in conventional SQL tables, which we ref
 
 \vspace*{0.5cm}
 \begin{example}
-Consider a measurements table with schema \texttt{temp\_meas(Sensor, T, Temp)} containing tuple of the form $(s, t, m)$, signifying that temperature sensor $s$ provided at time $t$ the temperature measurement $m$.
-Attribute \texttt{Sensor} is a foreign key to another table \texttt{temp\_sensor(ID, X, Y, Installed\_on, $\ldots$)} providing the properties of each sensor, including among others its latitude and longitude.% 
+Consider a measurements table with schema \texttt{temp\_meas(Sensor, T, Temp)} containing tuples of the form $(s, t, m)$, denoting that temperature sensor $s$ provided at time $t$ the temperature measurement $m$.
+Attribute \texttt{Sensor} is a foreign key to another table \texttt{temp\_sensor(ID, X, Y, Installed\_on, $\ldots$)} providing the properties of each sensor, including among others its latitude and longitude.
 \footnote{The data administrator can decide what is the best schema for the measurements data. For example, instead of a single table carrying all the temperature sensor measurements, the administrator may choose one table for each sensor.
 }
 \end{example}
 \vspace*{0.5cm}
 
-To facilitate easy data analysis, the model administrator can build models on top of the raw sensor data. To generate a model, the model administrator can utilize {\em learning algorithms}, which take as input the raw data and potentially external knowledge about them and return a model. Learning algorithms are designed by domain specialists, who have knowledge of the domain and the underlying physical properties of the sensor data. For instance, weather experts can design a weather learning algorithm. Although some of the learning algorithms will be domain specific (such as the weather example above), others are general algorithms proposed in the machine learning literature \reminder{Yoav, can you please add a reference?} and shown to be applicable to a wide range of domains. This includes among others algorithms for learning an ARMA mode (which is suitable for readings from sensors measuring natural phenomena, such as temperature), a PCA model (Principal Component Analysis) etc. To bootstrap the system and facilitate the quick generation of models for many common use cases, Plato comes preloaded with several such learning algorithms.
+To facilitate easy data analysis, the model administrator can build models on top of the raw measurements. To generate a model, the model administrator can utilize {\em learning algorithms}, which take as input the measurements and potentially background knowledge about the real world and return a model. Learning algorithms are designed by domain specialists, who have knowledge of the domain and the underlying physical properties of the sensor data. For instance, weather experts can design a weather learning algorithm. Although some of the learning algorithms will be domain specific (such as the weather example above), others are general algorithms proposed in the machine learning literature \reminder{Yoav, can you please add a reference?} and shown to be applicable to a wide range of domains. This includes among others algorithms for learning an ARMA (Autoregressive-moving-average) model (which is suitable for readings from sensors measuring natural phenomena, such as temperature), an SVD (Singular Value Decomposition) model etc. To bootstrap the system and facilitate the quick generation of models for many common use cases, Plato comes preloaded with several such learning algorithms.
 
-A learning algorithm $g$ has the general form of $g(R;p)$, taking as input a measurements table $R$ and a tuple $\bar{p}$ of parameter values. Since a learning algorithm should be adaptable to different scenarios (e.g., to domains of different dimensionality), it may accept a parameter vector $p$ of variable length.
+A learning algorithm $g$ has the general form of $g(R;p)$, taking as input a measurements table $R$ and a tuple $\bar{p}$ of parameter values. Since a learning algorithm should be adaptable to different scenarios (e.g., to domains of different dimensionality), it is in general polymorphic by accepting a parameter vector $p$ of variable length.
 
 \vspace*{0.5cm}
 \begin{example}
@@ -49,7 +47,6 @@ Models created through learning algorithms can be used as values in tables. To t
 \vspace*{0.5cm}
 \begin{example}
 \label{xmpl:models-and-definitions}
-%A tuple $(s, f)$ of the table \texttt{temp\_models(Sensor, F:t->temp)} means that the function $f$ describes the real world temperatures, which sensor $s$ was observing. The signature \texttt{t -> float} indicates that the functions/values of \texttt{F} input time and output floating points. The table \texttt{temp\_models} is defined by the view definition:
 For instance, in order to create a model table, containing sensor IDs and an ARMA model, representing the predicted temperatures for the particular sensor, one can write the following statement:
 
 \begin{verbatim}
@@ -97,15 +94,17 @@ The reasons for doing so could be: (a) The individual sensor models may be heavi
 
 \subsection{Queries and Optimized Query Evaluation}
 \label{sec:queries}
+
+\reminder{To Yannis P: The query language described below does not yet provide support for probabilities. Do we want to add it in?}
 A key success factor of database systems has been the declarative SQL query language where the user/developer expresses the desired result of his analysis without having to specify the algorithm that computes this result and without having to refer to the data structures where the data are stored. The database discovers the optimal plan to compute the result, making best use of the available data structures. 
 
-In the spirit of declarative programming, Plato offers an extension of SQL that enables computations involving models. A data analyst can query models in two different ways, corresponding to the different view points employed by statisticians and database programmers.
+In the spirit of declarative programming, Plato offers an extension of SQL that enables declarative querying of model tables. A data analyst can query model tables in two different ways. \reminder{Please check motivation for the two methods of querying model tables and revise if needed}\\
 
-Statisticians can regard the models as black boxes and query them through predefined functions that take as input one or more models and return a scalar, vector or even a new model. Examples of such functions are functions computing statistical properties of models, such as the correlation between a model or the autocorrelation within a model. Plato will support many common such functions, while additional functions can be added through a suitable API.
+\paragraph{Querying models through functions} According to the first approach, a SQL query over the model tables can operate on model attributes through special functions that take as input one or more models and return a scalar, a tuple, or a new model. For instance, a correlation function takes as input two models $M1$ and $M2$ and returns a scalar corresponding to their correlation. Similarly, a multiplication function takes as input a model $M$ and a scalar $c$ and returns a new model whose values are the values $M$ multiplied by $c$. Plato supports many common such functions, while additional functions can be added through a suitable API.
 
 \vspace*{0.5cm}
 \begin{example}
-The function $correlation(M1, M2)$ takes as input two models $M1$ and $M2$ and computes their correlation. Continuing our running example, one can utilize this function to compute all pairs of sensors whose models have a strong (i.e., greater than 0.9) correlation as follows:
+The function $correlation(M1, M2)$ takes as input two models $M1$ and $M2$ and computes their correlation. Continuing our running example, one can utilize this function to compute all pairs of temperature sensors whose models have a strong (i.e., greater than 0.9) correlation as follows:
 \begin{verbatim}
 SELECT sm1.sensor, sm2.sensor
 FROM sensor_models AS sm1, sensor_models AS sm2
@@ -114,10 +113,21 @@ WHERE correlation(sm1.model, sm2.model) > 0.9
 \end{example}
 \vspace*{0.5cm}
 
-\reminder{Please check motivation for second query language extension and revise if needed} While this approach is beneficial for checking high-level statistical properties of models for which functions have been implemented, it can quickly become tedious when one wants to do a series of manipulations to the models, such as selections, projections, joins and other operations provided through query languages. In this case, manipulating the models through functions forces the data analyst to use a composition of functions to compute the desired result. \reminder{Add example} To simplify such scenarios, Plato offers a second extension of querying the models, suitable for common database operations. According to this extension, a database developer can query the models by considering them as nested tables and using an extension of SQL suited for querying nested relational models. In particular, a model $f: \mathcal{D} \mapsto \mathcal{Q}$ from vector $(x, y, z, t)$ to vector $(q_1, q_2, \ldots q_n)$ can be seen as a table of schema $f(X, Y, Z, T, Q_1, Q_2, \ldots, Q_n)$, where $(X, Y, Z, T)$ is a primary key. Moreover, conceptually contains a single tuple for each value in $\mathcal{D}$. \reminder{Need to fix the transition from domains to attributes.} Since the latter is in general infinite, the model is also exposed to the data analyst as an infinite relation. This infinite relation can be queried through SQL queries (extended to account for nested relations).
+The data analyst may compose these functions to create more complex queries, as long as the top-level function that appears in the query's SELECT or WHERE clause returns a scalar or a tuple (since SQL cannot interpret model attributes). However, function composition can prevent the system from applying certain optimizations, since the query imposes a certain order of execution. The following example illustrates this issue.
 
 \vspace*{0.5cm}
 \begin{example}
+\reminder{To Yannis P: Ideally we need an example of a three-way join}
+%Consider an extension of our running example, where the model administrator has created 3 different models for the temperature measurements of each sensor. The resulting model table has schema \texttt{sensor\_model(sensor, model1, model2, model3)}.
+\end{example}
+\vspace*{0.5cm}
+
+\paragraph{Querying models by considering them as infinite tables} To address this issue, Plato allows data analysts to also query model tables by considering models as infinite tables on which they can execute regular SQL queries. In particular, a model $f: \mathcal{D} \mapsto \mathcal{Q}$ from vector $(x, y, z, t)$ to vector $(q_1, q_2, \ldots q_n)$ can be seen as a table of schema $f(X, Y, Z, T, Q_1, Q_2, \ldots, Q_n)$, where $(X, Y, Z, T)$ is a primary key. Conceptually this table is an infinite table containing a tuple predicting the value of the quantities $Q_1, Q_2, \ldots, Q_n$ for each value in $\mathcal{D}$. \reminder{I still do not like how we transition from domains to attributes. Any ideas?} This infinite relation can be queried through SQL queries (extended to account for the existence of nested relations).
+
+\vspace*{0.5cm}
+\begin{example}
+\label{xmpl:query-infinite-tables}
+\reminder{Switch example to show how the query of the previous example can be modelled through infinite relations}
 For instance, each ARMA model in our running example can be seen as a table over schema (T, Temp). Thus the model table \texttt{sensor\_models} defined above is a table over schema $sensor\_models(sensor, (T, Temp))$, where $(T, Temp)$ is the schema of the nested table corresponding to the model. Using this representation, we can ask for the temperature of all sensors at midnight of 01/01/2014 through the following query:
 
 \begin{verbatim}
@@ -128,8 +138,14 @@ WHERE T = 2014/01/01#00:00:00
 \end{example}
 \vspace*{0.5cm}
 
-Note that in general such queries over infinite relations could return an infinite result. Since this cannot be represented in practice, we will focus on {\em safe queries}; i.e. queries that are always guaranteed to return a finite result. Examples of such queries are queries asking about a particular point in the spatiotemporal domain (similar to the query above), queries asking for a finite set of points. \reminder{Add discussion on aggregations}
+Allowing data analysts to write SQL queries over infinite tables enables Plato to perform query optimizations, such as join reordering. However, the fact that models are conceptually infinite tables also creates two major challenges:\\
 
+\emph{(a) Defining a class of safe queries.} Since infinite tables cannot be represented in practice, Plato should only accept {\em safe queries}; i.e., queries that are guaranteed to return a finite result. Examples of such queries are queries asking about a particular point in the spatiotemporal domain, or a finite set of points. The goal of this work is to find the most general class of queries that are guaranteed to be safe.\\
+
+\emph{(b) Defining the query answering semantics for aggregate queries.} The semantics of safe Select-Project-Join queries is well-defined, as the query is operating on the finite domain, specified by the condition that makes the query safe. For instance, in Example \ref{xmpl:query-infinite-tables} the query is not operating on the infinite spatiotemporal domain, but only on a finite domain, consisting of the single time point 2014/01/01\#00:00:00 specified in the WHERE clause. \reminder{Change this example, if Example \ref{xmpl:query-infinite-tables} is modified} However, this does not hold for aggregate queries. Even though an aggregate query can be safe, the aggregate function will operate on the infinite spatiotemporal domain and thus cannot be defined in the same way as in SQL. For instance, consider a model providing precipitation values and the aggregate query computing the sum of precipitation values over a week. While the SUM function is defined in SQL as the sum of a finite number of values, in the case of the model it has to be defined as the integral of the precipitation model. The goal of this work is to formally define the semantics of safe aggregate queries through the use of calculus. 
+
+
+\reminder{Move next paragraph to the query processing section}
 Unlike conventional query optimization, where the rewritings produce equivalent expressions, opportune rewritings in model-based databases are not guaranteed to produce queries with identical results. Rather, in many important cases the results are guaranteed to be equivalent under common assumptions of statistical signal processing. In other cases, they are guaranteed to be equivalent within certain error bounds. Plato queries allow the user to specify the requested guarantee by providing appropriate parameters.
 
 %The first category utilizes various functions that input models and output statistic measures or models. The second category allows variables that range over the infinitely-many coordinate points. 
