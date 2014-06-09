@@ -3,90 +3,137 @@
 
 \section{Opportunities in Data Compression}
 \label{sec:compression}
-As is well known from signal processing, relatively few model classes, such as ARMA models, Fourier and wavelet-based models and Singular Value Decomposition (SVD) based models capture very well various scenarios. The key function of the raw data administrator is to choose the appropriate {\em model generator} and feed it with the appropriate parameters that will dictate compression, accuracy. The important lesson from signal processing is that high compression can be achieved with minimal or even no loss of accuracy.
 
-% Similarity to answering queries using views.
+Data compression and statistical models are closely related
+concept. Good statistical models allow Plato to achieve high
+compression rates. On the other hand, high compression rates indicate
+that plato has correctly identified significant statistical patterns
+in the data, and those patterns are potentially useful for the
+analyst.
 
-\subsection{Choosing model alternatives}
-\label{sec:choosing-model-alternatives}
+We now elaborate on this interdependence of models and compression and
+on the way they are used in Plato.
 
-\reminder{To Yoav: Please add discussion on the following: (a) Lossless: Does not achieve significant compression, (b) Noise-reducted lossy, (c) Additive hierarchy of (b)}
-
-\yoav{
-From a mathematical point of view, there is a close connection between
-fitting a probabilistic model to data and compressing the data. A both
-are central to the workings of Plato, we briefly describe them here.
-
-\subsubsection{Lossless compression}
+\subsection{Lossless compression}
 A lossless compression method is one which can reconstruct the
-original measurements without error. A lossless compression method
-corresponds to an assumption about the statistical model over the data
-and. The compression ratio is a function of the divergence (the
-Kullback-Leibler-divergence) between the assumed distribution and the true
-distribution. Thus the compression ratio is a measure of the
-randomness in the sensor data. Unfortunately, lossless compression
-methods usually achieve a compression ratio of around 2-4. Which
-corresponds to the fact that they accurately capture both the true
-state of the world (the signal) and the many random influences on the
-measurements (the noise). Lossless compression cannot distinguish
-between the two.
+original measurements without error. Popular lossless compression
+methods are {\tt gzip} and {\tt compress}. A lossless compression
+method corresponds to a statistical model over the data and the
+expected compression ratio is determined by the distance between
+statistical model and the empirical distribution of the data (as
+measured by the the Kullback-Leibler-divergence). 
 
+Unfortunately, lossless compression methods usually achieve a
+compression ratio of around of around 2 to 4. Which corresponds to the
+fact that it accurately captures both the true state of the world (the signal)
+and the many random influences on the measurements (the noise). 
+Lossless compression does not distinguish between the two.
+
+\newcommand{\vx}{\mathbf{x}}
 \newcommand{\hx}{\hat{x}}
-\subsubsection{Lossy compression}
+\newcommand{\vhx}{\hat{\mathbf{x}}}
+\newcommand{\vc}{\mathbf{c}}
+
+\subsection{Lossy compression}
 In order to reach higher compression ratios than lossless
-compression. It is common to use {\em Lossy compression}~\cite{CompressionBook}. In this
-case, instead of requiring perfect reconstruction of the original
-measurements, we allow a quantifyable amount of {\em distortion} in
-the reconstruction. Suppose $\langle x_1,\ldots,x_t \rangle$ is the original
-sequence and the reconstructed sequence is $\langle \hx_1,\ldots,\hx_t
-\rangle$.
-By far, the most common measure of distortion is the {\em root-mean-square}
+compression. It is common to use {\em Lossy compression}~\cite{CompressionBook}.
+
+Lossy compression is based on the assumption that the data to be
+compressed is a point in Euclidean space. From this point onward we
+assume that the measurements arriving from a (single) sensor is
+represented as a sequence of real values: $\vx=(x_1,x_2,\ldots,x_t)$.
+We denote the reconstruction of the sequence from the compressed
+version by $\vhx=(\hx_1,\hx_2,\ldots,\hx_t)$. As we are using lossy
+compression $\vhx$ is not equal to $\vx$. The difference between
+the two sequences is called the {\em residual}. We require that the
+residual is small. The measure of the size of the residual is called
+the {\em distortion}. We use two of the most popular distortion
+measures.
+\begin{itemize}
+\item By far, the most common measure of distortion is the {\em root-mean-square}
 or RMS:
 \[
-\mbox{RMS}\left(  \langle x_1,\ldots,x_t \rangle, \hx_1,\ldots,\hx_t \right)
+\mbox{RMS}\left(\hvx,\vx \right)
 \doteq \sqrt{\frac{\sum_{i=1}^t (x_i =\hx_i)^2}{t}}
 \]
-If the errors are usually small and only rarly very large,
+\item If the errors are usually small and only rarly very large,
 the RMS is misleadingly large. A better error measure in such
 situations is the fraction of times the error is larger
 than some threshold:
 \[
-\mbox{err}_{\epsilon}\left(  \langle x_1,\ldots,x_t \rangle,
-\hx_1,\ldots,\hx_t \right)
+\mbox{err}_{\epsilon}\left(\hvx,\vx \right)
 \doteq \frac{\sum_{i=1}^t \mathbf{1}\left(|x_i-\hx_i|>\epsilon \right)}{t}
 \]
+\end{itemize}
 Lossy compression methods such as {\tt jpeg2000} for images and {\tt
   mp3} for audio can achieve compression ratios of 100 and more
 with no perceptible degredation in quality.
 
-\subsubsection{Noise reduction through compression}
+\section{Additive models}
+Some of the most commonly used models used for lossy compression are
+additive with respect to the RMS distortion measure. This set of
+models includes FFT, Wavelets, and SVD. What we mean here by
+additivity is that any model is a sum of components: $\hvx =
+\sum_{i=1}^k \vc_i$;m that the best model for $k_2>k_1$ shares the
+first $k_1$ components with the best model using $k_1$ components; and
+that the reduction in the distortion is largest for the first component
+and decreases monotonically from component to component.
+
+Additive models lend themselves to a hierarchical compression
+schema. ****** To Be Continued. *****
+
+
+\section{Model Selection}
+\label{sec:Model Selection}
+~\cite{Sayood12},
+relatively few model classes, such as adaptive ARMA/DPCM models,
+Fourier and wavelet-based models and Singular Value Decomposition
+(SVD) based models can capture much of the statistical regularity in a
+large variety of applications. The key
+function of the raw data administrator is to choose a set of possible 
+and feed it with the appropriate parameters that
+will dictate compression, accuracy. The important lesson from signal
+processing is that high compression can be achieved with minimal or
+even no loss of accuracy.
+
+\subsection{Noise reduction}
 Lossy compression methods invariably lose some of the original
 information. However, it is often the case that the result is a
 reconstruction that is {\em closer} to the true underlying real-world
-values than the original measurements. How can that be?
+values than the original measurements. How is that possible?
 
-Consider a temperature guage in a room that is taking a measurement
-ten times per second. Suppose also that each measurement is the sum of
-the true temperature and measurement noise with a variance of one
-degree.  It is clear that replacing blocks of 10 consecutive
-measurements by their average is lossy in terms of the original
-signal. However, at the same time, it is closer to the true
-measurements. This noise reduction is based on our assumption that
-room temperature rarely changes significantly in a tenth of a
-second. Therefor any rapid variations in the measured temperature is
-likely to be an artifact of the sensor rather than anything real.
+This is possible when the model used for compression captures some
+inherent regularity in the data. Consider a temperature guage in a
+room that is taking a measurement ten times per second. Suppose also
+that each measurement is the sum of the true temperature and gaussian
+noise with a standard deviation of one degree.  It is clear that
+replacing blocks of 10 consecutive measurements by their average is
+lossy in terms of the original signal. However, at the same time, the
+averaged sequence is closer to the true measurements. This noise
+reduction relies of the assumption that room temperature rarely
+changes significantly within a tenth of a second. Therefor any rapid
+variations in the measured temperature is likely to be an artifact of
+the sensor rather than anything real.
 
+White noise is the continuous time equivalent of a sequence of
+independent gaussian random variables. It has the identifying property
+that it has zero correlation with any time shifted version of
+itself. In other words, it is structureless. The common test for white
+noise is to compute it's auto-correlation function and estimate the
+correlation length around offset of zero.
 
-White noise, formally known as the Weiner process
-
-It is not uncommon that compression methods that
-incorporate good model of the underlying real-world process can
-actually {\em clean} the raw measurements.
+This gives an alternative way for measuring the quality of a lossy
+compression scheme. Instead of estimating the average distortion
+according to some loss function, we test to see whether the residual
+is white noise. A white noise residual is likely to correspond to
+uninformative noise that can be ignored.
 
 \subsubsection{Incremental models}
+
+
 A powerful way of building compression methods is based on iterative
 compression of the residual. Using the notation above, the residual is 
-$r_i=x_i - \hx_i$. We expect the resudual to be small.}
+$r_i=x_i - \hx_i$. We expect the resudual to be small.
 
 \eat{
 \reminder{skip this subsection. may become irrelevant due to the increasing depth representation discussed in the query processing}
