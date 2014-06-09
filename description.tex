@@ -16,9 +16,11 @@
 
 %\usepackage[pdftex]{graphicx}
 \usepackage{graphicx}
-\usepackage{subfig}
+%\usepackage{subfig}
 \usepackage{calc}
 \usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
 
 \usepackage{url}
 
@@ -45,7 +47,7 @@
 
 %\newcommand{\reminder}[1]{}
 \newcommand{\reminder}[1]{ [[[ \marginpar{\mbox{$<==$}} #1 ]]] }
-\newcommand{\yoav}[1]{\reminder{#1}}
+%\newcommand{\yoav}[1]{\reminder{#1}}
 %\newcommand{\reminder}[1]{
 %    \par
 %    \colorbox[rgb]{0.8,0.8,0.8}{
@@ -143,6 +145,7 @@
 \input{queryprocessing}
 \input{sensordbdesign}
 \input{milestones}
+\input{results}
 \newpage
 
 
