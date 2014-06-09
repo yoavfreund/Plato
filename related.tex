@@ -1,6 +1,6 @@
 \section{Related Work}
 
-\paragraph{Works from ML and statistical signal processing communities} \reminder{for Yoav}
+\reminder{for Yoav: Please add: \paragraph{Works from ML and statistical signal processing communities} \cite{adaptive_filter_theory, dsp, prediction_learning_models, adaptive_signal_processing}}
 
 \paragraph{Model-based data infrastructure}
 The idea of incorporating models in database systems was first presented in the context of MauveDB \cite{mauvedb-grid, mauvedb-cidr, mauvedb-vldb}. This proposal extends these ideas in several important directions: First, MauveDB argues that models need to be discretized in the coordinates' grid, before they can be queried. In this proposal we show that a fully virtual approach, where the model is perceived as a continuous function, is both easier for the data analyst and more opportune for the query optimizer. For instance, consider two models represented by their Fourier transform and a query that asks for their correlation. It is most efficient to compute this query directly on the frequency domain rather than bring it back to the time domain. Second, while MauveDB showcases some of the challenges that arise in model-based systems and presents solutions for specific models, it lacks a general API that would allow one to plug in arbitrary models (which is one of the main goals of Plato). 
@@ -10,4 +10,4 @@ Apart from MauveDB, several works studied particular point problems related to t
 
 \paragraph{Efficient query processing on models} The idea of evaluating queries directly on the representation of a model without discretizing them first, was presented in the context of FunctionDB \cite{functiondb}. The work showed that for a broad class of polynomial functions, faster processing is achieved by evaluating queries directly on the algebraic representation of the functions. Plato's goal is to provide the platform infrastructure that enables such optimizations for additional classes of statistical models.
 
-\paragraph{Approximate query processing}
+\reminder{Add something on Approximate query processing}
