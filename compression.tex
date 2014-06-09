@@ -53,7 +53,7 @@ measures.
 \item By far, the most common measure of distortion is the {\em root-mean-square}
 or RMS:
 \[
-\mbox{RMS}\left(\hvx,\vx \right)
+\mbox{RMS}\left(\vhx,\vx \right)
 \doteq \sqrt{\frac{\sum_{i=1}^t (x_i =\hx_i)^2}{t}}
 \]
 \item If the errors are usually small and only rarly very large,
@@ -61,7 +61,7 @@ the RMS is misleadingly large. A better error measure in such
 situations is the fraction of times the error is larger
 than some threshold:
 \[
-\mbox{err}_{\epsilon}\left(\hvx,\vx \right)
+\mbox{err}_{\epsilon}\left(\vhx,\vx \right)
 \doteq \frac{\sum_{i=1}^t \mathbf{1}\left(|x_i-\hx_i|>\epsilon \right)}{t}
 \]
 \end{itemize}
@@ -73,7 +73,7 @@ with no perceptible degredation in quality.
 Some of the most commonly used models used for lossy compression are
 additive with respect to the RMS distortion measure. This set of
 models includes FFT, Wavelets, and SVD. What we mean here by
-additivity is that any model is a sum of components: $\hvx =
+additivity is that any model is a sum of components: $\vhx =
 \sum_{i=1}^k \vc_i$;m that the best model for $k_2>k_1$ shares the
 first $k_1$ components with the best model using $k_1$ components; and
 that the reduction in the distortion is largest for the first component
