@@ -117,7 +117,7 @@ WHERE correlation(sm1.Model, sm2.Model) > 0.9
 \end{example}
 \vspace*{0.5cm}
 
-The data analyst may compose these functions to create more complex queries, as long as the top-level function that appears in the query's SELECT or WHERE clause returns a scalar or a tuple (since SQL cannot interpret model attributes). However, function composition can prevent the system from applying certain optimizations, since the query imposes a certain order of execution. For instance, specifying a three-way join through function composition imposes a certain (non-optimal) join ordering. 
+The data analyst may compose these functions to create more complex queries, as long as the top-level function that appears in the query's SELECT or WHERE clause returns a scalar or a tuple (since SQL cannot interpret model attributes). However, function composition can prevent the system from applying certain optimizations, since the query imposes a certain order of execution. For instance, specifying a three-way join through function composition imposes a certain (non-optimal) join ordering. \\
 
 \paragraph{Querying models by considering them as infinite tables} To address this issue, Plato allows data analysts to also query model tables by considering models as infinite tables on which they can execute regular SQL queries. In particular, a model $f: \mathcal{D} \mapsto \mathcal{Q}$ from vector $(x, y, z, t)$ to vector $(q_1, q_2, \ldots q_n)$ can be seen as a table of schema $f(X, Y, Z, T, Q_1, Q_2, \ldots, Q_n)$, where $(X, Y, Z, T)$ is a primary key. Conceptually this table is an infinite table containing a tuple predicting the value of the quantities $Q_1, Q_2, \ldots, Q_n$ for each value in $\mathcal{D}$.
 
