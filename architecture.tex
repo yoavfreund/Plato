@@ -5,8 +5,6 @@
 \section{Models}
 \label{sec:models}
 
-\reminder{To Yannis P: I changed $\mathcal{\bar{D}}$ to $\mathcal{D}$, due to the reasons we discussed. Similarly for $\mathcal{\bar{Q}}$.}
-
 The proposed Plato database aims to solve the discussed problems by introducing models as first class citizens. A model is a mathematical representation of the world that predicts a quantity of interest (e.g., temperature) at every point of the spatiotemporal domain.
 In the basic case, a {\em model} is a continuous function $f:\mathcal{D}\mapsto \mathcal{Q}$ from a (generally multidimensional) spatiotemporal domain $\mathcal{D}$ to $\mathcal{Q}$. In this work we consider domains $\mathcal{D}$ that are subspaces of the four-dimensional spatiotemporal domain (that includes the three space dimensions X, Y, Z and the temporal dimension T). For instance, the domain of a model can be a sphere of $(x, y, t)$ points around a center $(x_0, y_0, t_0)$, a square of $(x, y)$ points, etc.
 
@@ -46,7 +44,7 @@ A learning algorithm $g$ has the general form of $g(R;p)$, taking as input a mea
 
 \vspace*{0.5cm}
 \begin{example}
-For instance, the learning algorithm $arma(R;{\bar{A}_{cont}}; \bar{A}_{meas})$ takes as input a measurements table $R$ together with the sets $\bar{A}_{cont}$, $\bar{A}_{meas}$ of attributes of $R$ that correspond to the spatiotemporal attributes and measurement attributes of $R$, respectively and creates an ARMA model $f:\mathcal{D}\mapsto\mathcal{Q}$, where $\mathcal{D}$ is the subspace of the spatiotemporal domain defined by attributes $\bar{A}_{cont}$ and $\mathcal{Q}$ is the equal to $Q_1 \times Q_2 \ldots \times Q_n$, where $Q_i$ the domain of the $i$-th attribute in $\bar{A}_{meas}$. \reminder{Which additional parameters should we include to the ARMA learning algorithm's signature to make it generally applicable?}
+For instance, the learning algorithm $arma(R;{\bar{A}_{cont}}; \bar{A}_{meas})$ takes as input a measurements table $R$ together with the sets $\bar{A}_{cont}$, $\bar{A}_{meas}$ of attributes of $R$ that correspond to the spatiotemporal attributes and measurement attributes of $R$, respectively and creates an ARMA model $f:\mathcal{D}\mapsto\mathcal{Q}$, where $\mathcal{D}$ is the subspace of the spatiotemporal domain defined by attributes $\bar{A}_{cont}$ and $\mathcal{Q}$ is the equal to $Q_1 \times Q_2 \ldots \times Q_n$, where $Q_i$ the domain of the $i$-th attribute in $\bar{A}_{meas}$.
 \end{example}  
 \vspace*{0.5cm}
 
@@ -72,7 +70,7 @@ The resulting model table \texttt{sensor\_models(Sensor, Model)} contains tuples
 
 A model table may be virtual in the sense that SQL view definitions are virtual, i.e., no actual computation is performed until a query uses them. However, in practice, the administrator is motivated to materialize models (and the  respective model tables) in order to benefit from the data compression that models enable. This can be achieved by adding the MATERIALIZED keyword in the view definition as shown above.
 
-Note, that the administrator has in general to choose in general between multiple model algorithms, which come with different compression levels and corresponding guarantees regarding information preservation. Indeed, a major research issue, discussed in Section~\ref{sec:model-generators}, is the semiautomation of the choice of model algorithms, which should take into consideration the query/analytics workload.
+Note, that the administrator has in general to choose in general between multiple model algorithms, which come with different compression levels and corresponding guarantees regarding information preservation. Indeed, a major research issue, discussed in Section~\ref{sec:compression}, is the semiautomation of the choice of model algorithms, which should take into consideration the query/analytics workload.
 
 \vspace*{0.5cm}
 \begin{example}
@@ -114,26 +112,18 @@ The function $correlation(M1, M2)$ takes as input two models $M1$ and $M2$ and c
 \begin{verbatim}
 SELECT sm1.Sensor, sm2.Sensor
 FROM sensor_models AS sm1, sensor_models AS sm2
-WHERE correlation(sm1.Model, sm2.Model) > 0.9 
+WHERE correlation(sm1.Model, sm2.Model) > 0.9
 \end{verbatim}
 \end{example}
 \vspace*{0.5cm}
 
-The data analyst may compose these functions to create more complex queries, as long as the top-level function that appears in the query's SELECT or WHERE clause returns a scalar or a tuple (since SQL cannot interpret model attributes). However, function composition can prevent the system from applying certain optimizations, since the query imposes a certain order of execution. The following example illustrates this issue.
+The data analyst may compose these functions to create more complex queries, as long as the top-level function that appears in the query's SELECT or WHERE clause returns a scalar or a tuple (since SQL cannot interpret model attributes). However, function composition can prevent the system from applying certain optimizations, since the query imposes a certain order of execution. For instance, specifying a three-way join through function composition imposes a certain (non-optimal) join ordering. 
 
-\vspace*{0.5cm}
-\begin{example}
-\reminder{To Yannis P: Ideally we need an example of a three-way join}
-%Consider an extension of our running example, where the model administrator has created 3 different models for the temperature measurements of each sensor. The resulting model table has schema \texttt{sensor\_model(sensor, model1, model2, model3)}.
-\end{example}
-\vspace*{0.5cm}
-
-\paragraph{Querying models by considering them as infinite tables} To address this issue, Plato allows data analysts to also query model tables by considering models as infinite tables on which they can execute regular SQL queries. In particular, a model $f: \mathcal{D} \mapsto \mathcal{Q}$ from vector $(x, y, z, t)$ to vector $(q_1, q_2, \ldots q_n)$ can be seen as a table of schema $f(X, Y, Z, T, Q_1, Q_2, \ldots, Q_n)$, where $(X, Y, Z, T)$ is a primary key. Conceptually this table is an infinite table containing a tuple predicting the value of the quantities $Q_1, Q_2, \ldots, Q_n$ for each value in $\mathcal{D}$. \reminder{I still do not like how we transition from domains to attributes. Any ideas?} This infinite relation can be queried through SQL queries (extended to account for the existence of nested relations).
+\paragraph{Querying models by considering them as infinite tables} To address this issue, Plato allows data analysts to also query model tables by considering models as infinite tables on which they can execute regular SQL queries. In particular, a model $f: \mathcal{D} \mapsto \mathcal{Q}$ from vector $(x, y, z, t)$ to vector $(q_1, q_2, \ldots q_n)$ can be seen as a table of schema $f(X, Y, Z, T, Q_1, Q_2, \ldots, Q_n)$, where $(X, Y, Z, T)$ is a primary key. Conceptually this table is an infinite table containing a tuple predicting the value of the quantities $Q_1, Q_2, \ldots, Q_n$ for each value in $\mathcal{D}$.
 
 \vspace*{0.5cm}
 \begin{example}
 \label{xmpl:query-infinite-tables}
-\reminder{Switch example to show how the query of the previous example can be modelled through infinite relations}
 For instance, each ARMA model in our running example can be seen as a table over schema (T, Temp). Thus the model table \texttt{sensor\_models} defined above is a table over schema $sensor\_models(sensor, (T, Temp))$, where $(T, Temp)$ is the schema of the nested table corresponding to the model. Using this representation, we can ask for the temperature of all sensors at midnight of 01/01/2014 through the following query:
 
 \begin{verbatim}
@@ -148,11 +138,24 @@ Allowing data analysts to write SQL queries over infinite tables enables Plato t
 
 \emph{(a) Defining a class of safe queries.} Since infinite tables cannot be represented in practice, Plato should only accept {\em safe queries}; i.e., queries that are guaranteed to return a finite result. Examples of such queries are queries asking about a particular point in the spatiotemporal domain, or a finite set of points. The goal of this work is to find the most general class of queries that are guaranteed to be safe.\\
 
-\emph{(b) Defining the query answering semantics for aggregate queries.} The semantics of safe Select-Project-Join queries is well-defined, as the query is operating on the finite domain, specified by the condition that makes the query safe. For instance, in Example \ref{xmpl:query-infinite-tables} the query is not operating on the infinite spatiotemporal domain, but only on a finite domain, consisting of the single time point 2014/01/01\#00:00:00 specified in the WHERE clause. \reminder{Change this example, if Example \ref{xmpl:query-infinite-tables} is modified} However, this does not hold for aggregate queries. Even though an aggregate query can be safe, the aggregate function will operate on the infinite spatiotemporal domain and thus cannot be defined in the same way as in SQL. For instance, consider a model providing precipitation values and the aggregate query computing the sum of precipitation values over a week. While the SUM function is defined in SQL as the sum of a finite number of values, in the case of the model it has to be defined as the integral of the precipitation model. The goal of this work is to formally define the semantics of safe aggregate queries through the use of calculus. 
+\emph{(b) Defining the query answering semantics for aggregate queries.} The semantics of safe Select-Project-Join queries is well-defined, as the query is operating on the finite domain, specified by the condition that makes the query safe. For instance, in Example \ref{xmpl:query-infinite-tables} the query is not operating on the infinite spatiotemporal domain, but only on a finite domain, consisting of the single time point 2014/01/01\#00:00:00 specified in the WHERE clause. However, this does not hold for aggregate queries. Even though an aggregate query may be safe (i.e., its final result will be finite), the aggregate function may still operate on the infinite spatiotemporal domain and thus cannot be defined in the same way as in SQL. For instance, consider a model providing precipitation values and the aggregate query computing the sum of precipitation values over a week. While the SUM function is defined in SQL as the sum of a finite number of values, in the case of the model it has to be defined as the integral of the precipitation model. The goal of this work is to formally define the semantics of safe aggregate queries through the use of calculus.\\
 
+\paragraph{Probabilistic queries} Since models return probability distributions, any query can also specify probability guarantees by providing the desired probability $p$ of the result being correct. In that case, Plato returns not only a single value $v$ but a confidence interval $[v-\epsilon, v+\epsilon]$ that is guaranteed to contain the correct answer with probability $p$. Such a query can be specified through the WITH PROBABILITY clause, as illustrated through the following example.
 
-\reminder{Move next paragraph to the query processing section}
-Unlike conventional query optimization, where the rewritings produce equivalent expressions, opportune rewritings in model-based databases are not guaranteed to produce queries with identical results. Rather, in many important cases the results are guaranteed to be equivalent under common assumptions of statistical signal processing. In other cases, they are guaranteed to be equivalent within certain error bounds. Plato queries allow the user to specify the requested guarantee by providing appropriate parameters.
+\vspace*{0.5cm}
+\begin{example}
+Query of Example \ref{xmpl:query-infinite-tables} can be augmented with a guideline for returning results with 0.95 probability as follows:
+
+\begin{verbatim}
+SELECT sm1.Sensor, m1.Temp
+FROM sensor_models AS sm1, sm1.Model AS m1
+WHERE T = 2014/01/01#00:00:00
+WITH PROBABILITY 0.95
+\end{verbatim}
+\end{example}
+\vspace*{0.5cm}
+
+%Unlike conventional query optimization, where the rewritings produce equivalent expressions, opportune rewritings in model-based databases are not guaranteed to produce queries with identical results. Rather, in many important cases the results are guaranteed to be equivalent under common assumptions of statistical signal processing. In other cases, they are guaranteed to be equivalent within certain error bounds. Plato queries allow the user to specify the requested guarantee by providing appropriate parameters.
 
 %The first category utilizes various functions that input models and output statistic measures or models. The second category allows variables that range over the infinitely-many coordinate points. 
 
