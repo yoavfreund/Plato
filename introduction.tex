@@ -14,16 +14,10 @@ The signal processing area has deeply built in its foundations the real world mo
 % Furthermore they require highly knowledgeable signal processing experts, who must combine statistics.
 It is apparent that databases and signal processing techniques should be coupled but, unfortunately, currently they do not mix well. The result is reduced productivity, very high requirements on the analysts (must be simultaneously experts in signal processing, statistics and big data management) and projects that cannot easily incorporate many types of data and many types of analysis.
 
-\reminder{to Yannis P: fix the roadmap}
+Section~\ref{sec:plato} introduces the proposed Plato database system, which brings the real world model concept into SQL databases, therefore combining the healthy productivity aspects of SQL systems (declarative queries, multiple levels of abstraction, automated optimization) with the sensor data processing benefits of signal processing techniques. Central to Plato  are the reduced-noise, additive models (Section~\ref{sec:noise-reducted}) that can be derived from common learning algorithms (in the field of signal processing) confer both a data quality benefit and a huge efficiency benefit, by virtue of providing very compressed representations of the model. Query processing algorithms can run directly on these compressed representations.
 
-Section~\ref{sec:plato} introduces the proposed Plato database system, which brings the real world model concept into SQL databases, therefore combining the healthy productivity aspects of SQL systems (declarative queries, multiple levels of abstraction, automated optimization) with the sensor data processing benefits of signal processing techniques.
-
-Section~\ref{sec:noise-reducted} argues that the reduced-noise, additive models that can be derived from common learning algorithms (in the field of signal processing) confer both a data quality benefit and a huge efficiency benefit, by virtue of providing very compressed representations of the model. Query processing algorithms can run directly on these compressed representations.
-
-% Incremental maintenance
-%Section~\ref{sec:} ....
-
-
+Finally, use cases and research challenges are discussed in Sections~\ref{sec:use-cases} and~\ref{sec:challenges}.
+ 
 \subsection{The healthy aspects of SQL databases in analytics}
 \label{sec:healthy-aspects}
 
